@@ -3,6 +3,8 @@ package com.example.popularmoviesstage2.movie;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Represents a movie obtained from api.themoviedb.org
  */
@@ -22,7 +24,8 @@ public class Movie implements Parcelable {
     private double vote_average;
     private String overview;
     private String release_date;
-
+    private ArrayList<String> trailers;
+    private ArrayList<String> reviews;
 
     /**
      * Empty constructor
@@ -51,6 +54,8 @@ public class Movie implements Parcelable {
         vote_average = in.readDouble();
         overview = in.readString();
         release_date = in.readString();
+        trailers = in.createStringArrayList();
+        reviews = in.createStringArrayList();
     }
 
     /**
@@ -216,6 +221,23 @@ public class Movie implements Parcelable {
         dest.writeDouble(vote_average);
         dest.writeString(overview);
         dest.writeString(release_date);
+        dest.writeStringList(trailers);
+        dest.writeStringList(reviews);
+    }
 
+    public ArrayList<String> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(ArrayList<String> trailers) {
+        this.trailers = trailers;
+    }
+
+    public ArrayList<String> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(ArrayList<String> reviews) {
+        this.reviews = reviews;
     }
 }

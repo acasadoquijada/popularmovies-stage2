@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -78,6 +79,10 @@ public class DetailActivity extends AppCompatActivity {
                     textViewVoteAverage = findViewById(R.id.vote_average);
                     textViewVoteAverage.setText(vote_average_help_text);
                     textViewVoteAverage.append(movie.getVote_average() + "/10");
+
+                    // Movie trailers
+                    Log.d("REVIEWS",movie.getReviews().toString());
+
                 }
 
             }

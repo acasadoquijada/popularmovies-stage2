@@ -1,12 +1,16 @@
 package com.example.popularmoviesstage2.utilities;
 
 
+import android.util.Log;
+
 import com.example.popularmoviesstage2.movie.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -29,6 +33,8 @@ public class JsonMovieUtils {
     private final static String vote_average_token = "vote_average";
     private final static String overview_token= "overview";
     private final static String release_date_token = "release_date";
+    private final static String key_token = "key";
+    private final static String review_content_key = "content";
 
 
     /**
@@ -50,7 +56,30 @@ public class JsonMovieUtils {
 
                 JSONObject jsonMovie = JSONArrayMovies.getJSONObject(i);
 
-                movies.add(parseMovie(jsonMovie));
+                Movie movie = parseMovie(jsonMovie);
+
+                if(movie != null){
+                    String trailers_string = "";
+                    String reviews_string = "";
+
+                    try {
+                        trailers_string = NetworkUtils.getTrailersMovie(movie.getId());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    movie.setTrailers(parseTrailersJsonArray(trailers_string));
+
+                    try {
+                        reviews_string = NetworkUtils.getReviewsMovie(movie.getId());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    movie.setReviews(parseReviewJsonArray(reviews_string));
+
+                    movies.add(movie);
+                }
             }
 
             return movies;
@@ -157,6 +186,87 @@ public class JsonMovieUtils {
             e.printStackTrace();
 
             return null;
+        }
+    }
+
+    static private ArrayList<String> parseTrailersJsonArray(String string_trailers){
+
+        try {
+
+            ArrayList<String> trailers = new ArrayList<>();
+
+            JSONObject JSONObjectResultQuery = new JSONObject(string_trailers);
+            JSONArray JSONTrailerArray = JSONObjectResultQuery.getJSONArray(results_token);
+
+
+            for (int i = 0; i < JSONTrailerArray.length(); i++) {
+
+                JSONObject jsonTrailer = JSONTrailerArray.getJSONObject(i);
+
+                trailers.add(parseTrailer(jsonTrailer));
+            }
+
+            return trailers;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    static private String parseTrailer(JSONObject json){
+
+        try {
+            String trailer_path = "https://www.youtube.com/watch?v=";
+            trailer_path += json.getString(key_token);
+
+//            Log.d("TRAILER", trailer_path);
+            return trailer_path;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static ArrayList<String> parseReviewJsonArray(String string_reviews){
+
+        try {
+
+            ArrayList<String> reviews = new ArrayList<>();
+
+            JSONObject JSONObjectResultQuery = new JSONObject(string_reviews);
+            JSONArray JSONTrailerArray = JSONObjectResultQuery.getJSONArray(results_token);
+
+
+            for (int i = 0; i < JSONTrailerArray.length(); i++) {
+
+                JSONObject jsonTrailer = JSONTrailerArray.getJSONObject(i);
+
+                reviews.add(parseReview(jsonTrailer));
+            }
+
+            return reviews;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    private static String parseReview(JSONObject json){
+
+
+        try {
+            String review = json.getString(review_content_key);
+            //Log.d("REVIEW",review);
+            return review;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+
         }
     }
 }

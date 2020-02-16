@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -25,15 +26,35 @@ public class NetworkUtils {
 
     private static final String KEY = ""; // Your key goes here!!
     private static final String api_key_sort = "api_key";
+    private static final String videos_token = "videos";
+    private static final String reviews_token = "reviews";
 
     /**
      * Creates a URL with the specified sort option
      * @param sort_option it can be top_rated or popular
      * @return The URL to fetch the HTTP response from.
      */
-    private static URL buildUrl(String sort_option){
+    private static URL buildMovieUrl(String sort_option){
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(sort_option)
+                .appendQueryParameter(api_key_sort,KEY)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+
+    }
+
+    private static URL buildMovieExtraInfoUrl(int id, String extra_info){
+        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                .appendPath(String.valueOf(id))
+                .appendPath(extra_info)
                 .appendQueryParameter(api_key_sort,KEY)
                 .build();
 
@@ -55,7 +76,7 @@ public class NetworkUtils {
      */
 
     public static String getTopRateMovies() throws IOException {
-        URL topRatedMoviesUrl = buildUrl(top_rated);
+        URL topRatedMoviesUrl = buildMovieUrl(top_rated);
         return getResponseFromHttpUrl(topRatedMoviesUrl);
 
     }
@@ -67,9 +88,31 @@ public class NetworkUtils {
      */
 
     public static String getPopularMovies() throws IOException {
-        URL topRatedMoviesUrl = buildUrl(popular);
+        URL topRatedMoviesUrl = buildMovieUrl(popular);
         return getResponseFromHttpUrl(topRatedMoviesUrl);
 
+    }
+
+    /**
+     * Obtain movie trailers in JSON
+     * @return String object containing the trailers in JSON format
+     * @throws IOException Related to network and stream reading
+     */
+
+    public static String getTrailersMovie(int movie_id) throws IOException {
+        URL trailersMovie = buildMovieExtraInfoUrl(movie_id,videos_token);
+        return getResponseFromHttpUrl(trailersMovie);
+    }
+
+    /**
+     * Obtain movie reviews in JSON
+     * @return String object containing the trailers in JSON format
+     * @throws IOException Related to network and stream reading
+     */
+
+    public static String getReviewsMovie(int movie_id) throws IOException {
+        URL trailersMovie = buildMovieExtraInfoUrl(movie_id, reviews_token);
+        return getResponseFromHttpUrl(trailersMovie);
     }
 
     /**
