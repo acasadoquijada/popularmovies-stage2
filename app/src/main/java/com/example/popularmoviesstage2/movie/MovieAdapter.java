@@ -1,6 +1,7 @@
 package com.example.popularmoviesstage2.movie;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         mMovies = movies;
         mNumberOfItems = movies.size();
         notifyDataSetChanged();
+    }
+
+    public void removeMovie(int pos){
+        mMovies.remove(pos);
+        mNumberOfItems = mMovies.size();
+        notifyItemRemoved(pos);
+        notifyItemRangeChanged(pos,mMovies.size());
     }
     /**
      * Creates a ViewHolder inflating the layout from an xml file

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -26,6 +27,7 @@ public class DetailActivity extends AppCompatActivity {
     private Movie movie;
     private final String toogle_button_token = "toogle_button";
     private boolean toggle_button_pressed;
+    private int pos;
 
     /**
      * onCreate method run when the Activity is created
@@ -61,6 +63,8 @@ public class DetailActivity extends AppCompatActivity {
             if (b != null && b.getParcelable(MainActivity.parcelable_token) != null) {
 
                 movie = b.getParcelable(MainActivity.parcelable_token);
+
+                pos = intent.getIntExtra("pos",0);
 
                 if (movie != null) {
                     // Movie poster
@@ -108,8 +112,8 @@ public class DetailActivity extends AppCompatActivity {
 
                             } else {
                                 MainActivity.db.deleteMovie(movie);
+                                MainActivity.mAdapter.removeMovie(pos);
                                 toggle_button_pressed = false;
-
                             }
                         }
                     });
@@ -249,9 +253,6 @@ public class DetailActivity extends AppCompatActivity {
      */
 
     private int calculatePX(int dp){
-        // Conversion formula obtained here:
-        // https://stackoverflow.com/questions/4275797/
-        // view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
 
         final float scale = getResources().getDisplayMetrics().density;
         return (int) (dp * scale + 0.5f);

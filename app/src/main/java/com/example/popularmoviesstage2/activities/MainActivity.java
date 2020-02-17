@@ -30,7 +30,7 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
 
-    private MovieAdapter mAdapter;
+    public static MovieAdapter mAdapter;
     private RecyclerView mMovieGrid;
     private ArrayList<Movie> mMovies;
     private ArrayList<Movie> mFavoriteMovies;
@@ -41,13 +41,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
     public static final String bundle_token = "token";
     public static final String parcelable_token = "parcelable";
-    private static final String movies_token = "movies";
-    private static final String favorite_movies_token = "favorite_movies";
-    private static final String previous_sort_option_token = "previousSortOption";
-    private static final String current_sort_option_token = "currentSortOption";
-    private static final String title_token = "title";
+    private final String movies_token = "movies";
+    private final String favorite_movies_token = "favorite_movies";
+    private final String previous_sort_option_token = "previousSortOption";
+    private final String current_sort_option_token = "currentSortOption";
+    private final String title_token = "title";
     private final String favorite_option = "favorite";
-
 
     public static DataBaseHelper db;
 
@@ -165,10 +164,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
             if(m.size() > 0) {
                 mFavoriteMovies = m;
-                //mAdapter.updateData(mFavoriteMovies);
-
-                mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
-                mMovieGrid.setAdapter(mAdapter);
+                mAdapter.updateData(mFavoriteMovies);
             }
 
             currentSortOption = favorite_option;
@@ -198,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
         intent.putExtra(bundle_token,bundle);
+
+        intent.putExtra("pos",clickedItemIndex);
 
         startActivity(intent);
 
