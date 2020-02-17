@@ -9,7 +9,6 @@ This repo contains all the work done for the **Popular Movies Stage 2** project 
 This application is built on top of [Popular Movies Stage 1](https://github.com/acasadoquijada/popularmovies-stage1). Because of this, it has all the Stage 1 functionalities plus:
 
 * User's are now able to play movie trailers in the Youtube app
-    You’ll allow users to view and play trailers ( either in the youtube app or a web browser).
  * Reviews are shown in the DetailActivity of each movie
  * Added option to mark/unmark movies as favorite.
  * Added sort option to sort by favorites
@@ -35,7 +34,7 @@ This application is built on top of [Popular Movies Stage 1](https://github.com/
 * MainActivity: Main Activity of the app. All the network request are done here
 
 **Movie package**
--
+
 * Movie: Represents a movie with all its info
 * MovieAdapter: RecyclerView in charge of present the movies to the user
 
