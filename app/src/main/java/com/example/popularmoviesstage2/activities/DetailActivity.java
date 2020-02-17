@@ -64,7 +64,7 @@ public class DetailActivity extends AppCompatActivity {
 
                 movie = b.getParcelable(MainActivity.parcelable_token);
 
-                pos = intent.getIntExtra("pos",0);
+                pos = intent.getIntExtra(MainActivity.movie_pos_token,-1);
 
                 if (movie != null) {
                     // Movie poster
@@ -112,7 +112,10 @@ public class DetailActivity extends AppCompatActivity {
 
                             } else {
                                 MainActivity.db.deleteMovie(movie);
-                                MainActivity.mAdapter.removeMovie(pos);
+
+                                if(pos != -1)
+                                    MainActivity.mAdapter.removeMovie(pos);
+
                                 toggle_button_pressed = false;
                             }
                         }

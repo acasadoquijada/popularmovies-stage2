@@ -38,15 +38,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private String previousSortOption = "";
     private String currentSortOption = "";
     private String appName = "";
+    private boolean favoriteMoviesShowing;
 
     public static final String bundle_token = "token";
     public static final String parcelable_token = "parcelable";
+    public static final String movie_pos_token = "movie_pos";
+
     private final String movies_token = "movies";
     private final String favorite_movies_token = "favorite_movies";
+    private final String favorite_movies_showing_token = "favorite_movies_showing";
     private final String previous_sort_option_token = "previousSortOption";
     private final String current_sort_option_token = "currentSortOption";
     private final String title_token = "title";
-    private final String favorite_option = "favorite";
 
     public static DataBaseHelper db;
 
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             mFavoriteMovies = savedInstanceState.getParcelableArrayList(favorite_movies_token);
             previousSortOption = savedInstanceState.getString(previous_sort_option_token);
             currentSortOption = savedInstanceState.getString(current_sort_option_token);
+            favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
             appName = savedInstanceState.getString(title_token);
             this.setTitle(appName);
 
@@ -75,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             mMovies = new ArrayList<>();
             mFavoriteMovies = new ArrayList<>();
 
+            favoriteMoviesShowing = false;
             appName = getString(R.string.app_name_sort_popular);
             this.setTitle(appName);
         }
@@ -85,14 +90,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         mMovieGrid.setLayoutManager(gridLayoutManager);
 
-        if(currentSortOption.equals(favorite_option)){
+        if(favoriteMoviesShowing){
             mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
             mMovieGrid.setAdapter(mAdapter);
         } else{
             mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
             mMovieGrid.setAdapter(mAdapter);
             new FetchMoviesTask().execute(currentSortOption);
-
         }
 
         // Create database
@@ -107,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         outState.putString(previous_sort_option_token, previousSortOption);
         outState.putString(current_sort_option_token, currentSortOption);
+        outState.putBoolean(favorite_movies_showing_token,favoriteMoviesShowing);
         outState.putString(title_token, appName);
 
         super.onSaveInstanceState(outState);
@@ -120,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         appName = savedInstanceState.getString(title_token);
         previousSortOption = savedInstanceState.getString(previous_sort_option_token);
         currentSortOption = savedInstanceState.getString(current_sort_option_token);
+
+        favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
    }
 
     /**
@@ -167,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
                 mAdapter.updateData(mFavoriteMovies);
             }
 
-            currentSortOption = favorite_option;
+            favoriteMoviesShowing = true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -185,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         Bundle bundle = new Bundle();
 
-        if(currentSortOption.equals(favorite_option)){
+        if(favoriteMoviesShowing){
             bundle.putParcelable(parcelable_token, mFavoriteMovies.get(clickedItemIndex));
         } else{
             bundle.putParcelable(parcelable_token, mMovies.get(clickedItemIndex));
@@ -195,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         intent.putExtra(bundle_token,bundle);
 
-        intent.putExtra("pos",clickedItemIndex);
+        intent.putExtra(movie_pos_token,clickedItemIndex);
 
         startActivity(intent);
 
@@ -309,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
                 mMovies = movies;
                 mAdapter.updateData(movies);
                 previousSortOption = currentSortOption;
+                favoriteMoviesShowing = false;
             }
         }
     }
