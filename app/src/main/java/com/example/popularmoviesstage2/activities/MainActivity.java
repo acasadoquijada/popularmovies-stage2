@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -27,7 +26,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 /**
- * Main Activity of the Popular Movies Stage 1 application
+ * Main Activity of the Popular Movies Stage 2 application
  */
 public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
 
@@ -40,14 +39,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private String currentSortOption = "";
     private String appName = "";
 
-    public static String bundle_token = "token";
-    public static String parcelable_token = "parcelable";
-    private static String movies_token = "movies";
-    private static String favorite_movies_token = "favorite_movies";
-    private static String previous_sort_option_token = "previousSortOption";
-    private static String current_sort_option_token = "currentSortOption";
-    private static String title_token = "title";
-    private String favorite_option = "favorite";
+    public static final String bundle_token = "token";
+    public static final String parcelable_token = "parcelable";
+    private static final String movies_token = "movies";
+    private static final String favorite_movies_token = "favorite_movies";
+    private static final String previous_sort_option_token = "previousSortOption";
+    private static final String current_sort_option_token = "currentSortOption";
+    private static final String title_token = "title";
+    private final String favorite_option = "favorite";
 
 
     public static DataBaseHelper db;
@@ -212,6 +211,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         ProgressDialog progDailog;
 
+
+        /**
+         * Creates and show the ProgressDialog
+         */
         @Override
         protected void onPreExecute() {
             super.onPreExecute();

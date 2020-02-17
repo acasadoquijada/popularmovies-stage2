@@ -1,8 +1,6 @@
 package com.example.popularmoviesstage2.utilities;
 
 
-import android.util.Log;
-
 import com.example.popularmoviesstage2.movie.Movie;
 
 import org.json.JSONArray;
@@ -10,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -109,7 +106,6 @@ public class JsonMovieUtils {
             String backdrop_path;
             String original_language;
             String original_title;
-            int[] genre_ids;
             String title;
             double vote_average;
             String overview;
@@ -189,6 +185,11 @@ public class JsonMovieUtils {
         }
     }
 
+    /**
+     * Return an ArrayList of strings with all the trailers
+     * @param string_trailers JSONArray containing the trailers
+     * @return ArrayList with all the trailers
+     */
     static private ArrayList<String> parseTrailersJsonArray(String string_trailers){
 
         try {
@@ -215,13 +216,17 @@ public class JsonMovieUtils {
 
     }
 
+    /**
+     * Obtains a trailer link within a JSONObject
+     * @param json with the trailer
+     * @return string trailer
+     */
     static private String parseTrailer(JSONObject json){
 
         try {
             String trailer_path = "https://www.youtube.com/watch?v=";
             trailer_path += json.getString(key_token);
 
-//            Log.d("TRAILER", trailer_path);
             return trailer_path;
 
         } catch (JSONException e) {
@@ -229,6 +234,12 @@ public class JsonMovieUtils {
             return null;
         }
     }
+
+    /**
+     * Returns an ArrayList<String> with all the reviews
+     * @param string_reviews string containing a JSONArray with the reviews
+     * @return all the reviews in an ArrayList
+     */
 
     private static ArrayList<String> parseReviewJsonArray(String string_reviews){
 
@@ -256,13 +267,15 @@ public class JsonMovieUtils {
 
     }
 
+    /**
+     * Obtain a review in String format from a JSON
+     * @param json containing the review
+     * @return string review
+     */
     private static String parseReview(JSONObject json){
 
-
         try {
-            String review = json.getString(review_content_key);
-            //Log.d("REVIEW",review);
-            return review;
+            return json.getString(review_content_key);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

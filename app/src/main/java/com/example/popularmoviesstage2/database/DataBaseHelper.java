@@ -5,12 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.example.popularmoviesstage2.movie.Movie;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+
+/**
+ * This class is in charge to store in a DataBase and manipulate
+ * the movies marked as favorite by the user.
+ */
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
@@ -40,6 +44,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    /**
+     * Insert a favorite movie in the DB if not exists already
+     * @param movie to insert
+     */
     public void insertMovie(Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -56,6 +64,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Delete a movie from the DB
+     * @param movie to delete
+     */
     public void deleteMovie(Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -64,6 +76,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         db.execSQL(deleteQuery);
     }
+
+    /**
+     * Checks if a given movie is already in the DB
+     * @param movie to consult
+     * @return true if the movie is in the DB. Otherwise false
+     */
 
     public boolean movieInDataBase(Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -79,6 +97,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         return movieStored;
     }
+
+    /**
+     * Returns all the movies in the DB
+     * @return ArrayList with all the movies
+     */
 
     public ArrayList<Movie> getMovies(){
         SQLiteDatabase db = this.getReadableDatabase();
@@ -109,9 +132,4 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public void clearDatabase() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String clearDBQuery = "DELETE FROM "+ MOVIE_TABLE_NAME;
-        db.execSQL(clearDBQuery);
-    }
 }

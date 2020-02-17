@@ -39,14 +39,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         mMovies = m;
     }
 
-    public void clearData(){
-        mMovies.clear();
-    }
-
-    public void setData(ArrayList<Movie> movies){
-        mMovies = movies;
-    }
-
     public void updateData(ArrayList<Movie> movies){
         mMovies = movies;
         mNumberOfItems = movies.size();

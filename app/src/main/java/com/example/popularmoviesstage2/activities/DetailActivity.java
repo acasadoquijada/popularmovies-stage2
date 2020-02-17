@@ -1,14 +1,10 @@
 package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ShareCompat;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -20,8 +16,6 @@ import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.R;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
 /**
  * Activity class that presents the movie details to the user
  *
@@ -29,9 +23,8 @@ import org.w3c.dom.Text;
 
 public class DetailActivity extends AppCompatActivity {
 
-    Movie movie;
-    ToggleButton toggle;
-    private String toogle_button_token = "toogle_button";
+    private Movie movie;
+    private final String toogle_button_token = "toogle_button";
     private boolean toggle_button_pressed;
 
     /**
@@ -57,7 +50,6 @@ public class DetailActivity extends AppCompatActivity {
         TextView textViewReleaseDate;
         TextView textViewVoteAverage;
         ImageView imageViewMoviePoster;
-        LinearLayout bottomLinearLayout;
         Intent intent;
 
         intent = getIntent();
@@ -96,7 +88,7 @@ public class DetailActivity extends AppCompatActivity {
                     textViewVoteAverage.append(movie.getVote_average() + "/10");
 
                     // Toggle button for favorite movie
-                    ToggleButton toggle = (ToggleButton) findViewById(R.id.fav_togglebutton);
+                    ToggleButton toggle = findViewById(R.id.fav_togglebutton);
 
 
                     if (savedInstanceState != null) {
@@ -135,51 +127,27 @@ public class DetailActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Adds the views necessaries to display the trailers of a given movie
+     * @param movie to obtain the trailers from
+     */
     private void AddMovieTrailers(Movie movie){
 
         // Get parent layout
         LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
 
-        TextView trailer_section_title = new TextView(this);
-
-        // Add a title for the review trailer
-        String trailer_section_title_text = "Trailers";
-
-        trailer_section_title.setText(trailer_section_title_text);
-
-        // Conversion formula obtained here:
-        // https://stackoverflow.com/questions/4275797/
-        // view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
-
-        int padding_in_dp = 20;
-        final float scale = getResources().getDisplayMetrics().density;
-        int padding_in_px = (int) (padding_in_dp * scale + 0.5f);
-
-        trailer_section_title.setPadding(padding_in_px,0,0,0);
-
-        trailer_section_title.setTextColor(getResources().getColor(android.R.color.black));
-
-        trailer_section_title.setTextSize(25);
-
+        // Create TextView to present trailer section
+        TextView trailer_section_title = getTitleSection("Trailers");
         bottomLinearLayout.addView(trailer_section_title,bottomLinearLayout.getChildCount());
 
         // Create LinearLayout for the Trailers
 
-        LinearLayout parent = new LinearLayout(this);
+        LinearLayout trailerLinearLayout = createLinearLayout();
 
-        parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        parent.setPadding(padding_in_px,padding_in_px,padding_in_px,padding_in_px);
+        // Iterate over the trailers
 
-        parent.setOrientation(LinearLayout.VERTICAL);
-
-        parent.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-
-        parent.setDividerDrawable(getResources().getDrawable(R.drawable.shape));
-
-        // Iterate over the reviews and add them as textviews
-
-        padding_in_dp = 15;
-        padding_in_px = (int) (padding_in_dp * scale + 0.5f);
+        int padding_in_dp = 15;
+        int padding_in_px = calculatePX(padding_in_dp);
 
         for(int i = 0; i < movie.getTrailers().size(); i++){
             ImageView trailerImageView = new ImageView(this);
@@ -189,21 +157,24 @@ public class DetailActivity extends AppCompatActivity {
 
             trailerTextView.setPadding(0,padding_in_px,0,padding_in_px);
 
-            //trailerImageView.setText(movie.getTrailers().get(i));
-
             trailerImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_media_video_poster));
 
             trailerImageView.setPadding(0,padding_in_px,0,padding_in_px);
 
             setOnClick(trailerImageView,movie.getTrailers().get(i));
 
-            parent.addView(trailerTextView,parent.getChildCount());
-            parent.addView(trailerImageView,parent.getChildCount());
+            trailerLinearLayout.addView(trailerTextView,trailerLinearLayout.getChildCount());
+            trailerLinearLayout.addView(trailerImageView,trailerLinearLayout.getChildCount());
         }
 
-        bottomLinearLayout.addView(parent,bottomLinearLayout.getChildCount());
+        bottomLinearLayout.addView(trailerLinearLayout,bottomLinearLayout.getChildCount());
     }
 
+    /**
+     * onClick method to open a trailer in the Youtube app
+     * @param imageView corresponding to the trailer
+     * @param trailer_path trailer youtube link
+     */
     private void setOnClick(final ImageView imageView, final String trailer_path){
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,78 +186,130 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    private void addMovieReviews(Movie movie){
+    /**
+     * Creates a LinearLayout. This is used for the Reviews and Trailers.
+     * @return a LinearLayout
+     */
 
+    private LinearLayout createLinearLayout(){
 
-        // Get parent layout
-        LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
+        LinearLayout linearLayout = new LinearLayout(this);
 
-        TextView review_section_title = new TextView(this);
-
-        // Add a title for the review section
-        String review_section_title_text = "Reviews";
-
-        review_section_title.setText(review_section_title_text);
-
-        // Conversion formula obtained here:
-        // https://stackoverflow.com/questions/4275797/
-        // view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
+        linearLayout.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
 
         int padding_in_dp = 20;
         final float scale = getResources().getDisplayMetrics().density;
         int padding_in_px = (int) (padding_in_dp * scale + 0.5f);
 
-        review_section_title.setPadding(padding_in_px,0,0,0);
+        linearLayout.setPadding(padding_in_px,padding_in_px,padding_in_px,padding_in_px);
 
-        review_section_title.setTextColor(getResources().getColor(android.R.color.black));
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        review_section_title.setTextSize(25);
+        linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
 
+        linearLayout.setDividerDrawable(getResources().getDrawable(R.drawable.shape));
+
+        return linearLayout;
+    }
+
+    /**
+     * Creates a TextView that works as a title for a new section.
+     * This is used for Reviews and trailers
+     * @param section_name to be set in the TextView
+     * @return a TextView object
+     */
+    private TextView getTitleSection(String section_name){
+
+        TextView section_title = new TextView(this);
+
+        section_title.setText(section_name);
+
+        int padding_in_dp = 20;
+        int padding_in_px = calculatePX(padding_in_dp);
+
+        section_title.setPadding(padding_in_px,0,0,0);
+
+        section_title.setTextColor(getResources().getColor(android.R.color.black));
+
+        section_title.setTextSize(25);
+
+        return section_title;
+    }
+
+    /**
+     * Convert the dp unit to px.
+     *
+     * Conversion formula obtained here:
+     * https://stackoverflow.com/questions/4275797/
+     * view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
+     * @param dp to be converted into px
+     * @return px
+     */
+
+    private int calculatePX(int dp){
+        // Conversion formula obtained here:
+        // https://stackoverflow.com/questions/4275797/
+        // view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
+
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (dp * scale + 0.5f);
+    }
+
+    /**
+     * Adds the views necessaries to display the reviews of a given movie
+     * @param movie to obtain the reviews from
+     */
+    private void addMovieReviews(Movie movie){
+
+        // Get trailerLinearLayout layout
+        LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
+
+        TextView review_section_title = getTitleSection("Reviews");
         bottomLinearLayout.addView(review_section_title,bottomLinearLayout.getChildCount());
 
         // Create LinearLayout for the Reviews
 
-        LinearLayout parent = new LinearLayout(this);
-
-        parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        parent.setPadding(padding_in_px,padding_in_px,padding_in_px,padding_in_px);
-
-
-        parent.setOrientation(LinearLayout.VERTICAL);
-
-        parent.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-
-        parent.setDividerDrawable(getResources().getDrawable(R.drawable.shape));
-
+        LinearLayout reviewLinearLayout = createLinearLayout();
 
         // Iterate over the reviews and add them as textviews
 
-        padding_in_dp = 15;
-        padding_in_px = (int) (padding_in_dp * scale + 0.5f);
+        int padding_in_dp = 15;
+        int padding_in_px = calculatePX(padding_in_dp);
 
-        for(int i = 0; i < movie.getReviews().size(); i++){
+        // In case there is not reviews we let the user know
+        if(movie.getReviews().size() == 0){
             TextView reviewTextView = new TextView(this);
 
-            reviewTextView.setText(movie.getReviews().get(i));
+            String no_reviews = "There is no reviews for this movie";
+            reviewTextView.setText(no_reviews);
 
             reviewTextView.setPadding(0,padding_in_px,0,padding_in_px);
 
-            parent.addView(reviewTextView,parent.getChildCount());
+            reviewLinearLayout.addView(reviewTextView,reviewLinearLayout.getChildCount());
+        } else {
+            for(int i = 0; i < movie.getReviews().size(); i++){
+                TextView reviewTextView = new TextView(this);
+
+                reviewTextView.setText(movie.getReviews().get(i));
+
+                reviewTextView.setPadding(0,padding_in_px,0,padding_in_px);
+
+                reviewLinearLayout.addView(reviewTextView,reviewLinearLayout.getChildCount());
+            }
         }
 
-        bottomLinearLayout.addView(parent,bottomLinearLayout.getChildCount());
+        bottomLinearLayout.addView(reviewLinearLayout,bottomLinearLayout.getChildCount());
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         toggle_button_pressed = (savedInstanceState.getBoolean(toogle_button_token));
-        Log.d("PRESSED 2",String.valueOf(toggle_button_pressed));
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
-        Log.d("PRESSED 1",String.valueOf(toggle_button_pressed));
         outState.putBoolean(toogle_button_token, toggle_button_pressed);
         // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState);

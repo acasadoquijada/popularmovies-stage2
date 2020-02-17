@@ -10,6 +10,5 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:contentDescription="TODO" />
-
+        android:contentDescription="@string/movie_poster" />
 </FrameLayout>

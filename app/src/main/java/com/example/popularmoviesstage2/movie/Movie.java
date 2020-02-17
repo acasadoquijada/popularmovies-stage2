@@ -76,24 +76,12 @@ public class Movie implements Parcelable {
         }
     };
 
-    public int getPopularity() {
-        return popularity;
-    }
-
     public void setPopularity(int popularity) {
         this.popularity = popularity;
     }
 
-    public int getVote_count() {
-        return vote_count;
-    }
-
     public void setVote_count(int vote_count) {
         this.vote_count = vote_count;
-    }
-
-    public boolean isVideo() {
-        return video;
     }
 
     public void setVideo(boolean video) {
@@ -108,24 +96,12 @@ public class Movie implements Parcelable {
         this.id = id;
     }
 
-    public boolean isAdult() {
-        return adult;
-    }
-
     public void setAdult(boolean adult) {
         this.adult = adult;
     }
 
-    public String getBackdrop_path() {
-        return backdrop_path;
-    }
-
     public void setBackdrop_path(String backdrop_path) {
         this.backdrop_path = backdrop_path;
-    }
-
-    public String getOriginal_language() {
-        return original_language;
     }
 
     public void setOriginal_language(String original_language) {
@@ -138,22 +114,6 @@ public class Movie implements Parcelable {
 
     public void setOriginal_title(String original_title) {
         this.original_title = original_title;
-    }
-
-    public int[] getGenre_ids() {
-        return genre_ids;
-    }
-
-    public void setGenre_ids(int[] genre_ids) {
-        this.genre_ids = genre_ids;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public double getVote_average() {
