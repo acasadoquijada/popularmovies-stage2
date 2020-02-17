@@ -4,4 +4,7 @@
     <string name="popular_movies">Popular</string>
     <string name="fav_movies">Favorites</string>
     <string name="movie_thumbnail">thumbnail</string>
+    <string name="app_name_sort_popular">Popular Movies sorted by popularity</string>
+    <string name="app_name_sort_rate">Popular Movies sorted by rate</string>
+    <string name="app_name_sort_fav">Popular Movies sorted by favorite</string>
 </resources>

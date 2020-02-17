@@ -42,20 +42,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public void insertMovie(Movie movie){
         SQLiteDatabase db = this.getWritableDatabase();
-        // First we check if the record already exists
 
-        String selectQuery =
-                "SELECT * FROM " + MOVIE_TABLE_NAME + " WHERE " + MOVIE_ID + "=" + movie.getId();
-
-        Cursor cursor = db.rawQuery(selectQuery,null);
-
-        // moveToFirst == false, no record
-        if(!cursor.moveToFirst()){
+        if(!movieInDataBase(movie)){
             ContentValues contentValues = new ContentValues();
             contentValues.put(MOVIE_ID, movie.getId());
-
-            Log.d("MOVIE_ID",String.valueOf(movie.getId()));
-
             // Convert
             Gson gson = new Gson();
             String toStoreObject = gson.toJson(movie, Movie.class);
@@ -64,8 +54,30 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             db.insert(MOVIE_TABLE_NAME, null, contentValues);
         }
 
+    }
+
+    public void deleteMovie(Movie movie){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String deleteQuery =
+                "DELETE FROM " + MOVIE_TABLE_NAME + " WHERE " + MOVIE_ID + "=" + movie.getId();
+
+        db.execSQL(deleteQuery);
+    }
+
+    public boolean movieInDataBase(Movie movie){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery =
+                "SELECT * FROM " + MOVIE_TABLE_NAME + " WHERE " + MOVIE_ID + "=" + movie.getId();
+
+        Cursor cursor = db.rawQuery(selectQuery,null);
+
+        boolean movieStored = cursor.moveToFirst();
+
         cursor.close();
 
+        return movieStored;
     }
 
     public ArrayList<Movie> getMovies(){

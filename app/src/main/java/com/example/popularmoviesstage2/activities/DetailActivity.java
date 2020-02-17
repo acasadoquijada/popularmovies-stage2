@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.R;
@@ -19,6 +21,11 @@ import com.squareup.picasso.Picasso;
  */
 
 public class DetailActivity extends AppCompatActivity {
+
+    Movie movie;
+    ToggleButton toggle;
+    private String toogle_button_token = "toogle_button";
+    private boolean toggle_button_pressed;
 
     /**
      * onCreate method run when the Activity is created
@@ -45,7 +52,6 @@ public class DetailActivity extends AppCompatActivity {
         ImageView imageViewMoviePoster;
         LinearLayout bottomLinearLayout;
         Intent intent;
-        Movie movie;
 
         intent = getIntent();
 
@@ -85,7 +91,37 @@ public class DetailActivity extends AppCompatActivity {
                     // Movie trailers
                     Log.d("REVIEWS",movie.getReviews().toString());
 
-                    MainActivity.db.insertMovie(movie);
+
+                    ToggleButton toggle = (ToggleButton) findViewById(R.id.fav_togglebutton);
+                    Log.d("PRESSED 3",String.valueOf(toggle_button_pressed));
+
+
+
+                    if (savedInstanceState != null) {
+                        toggle_button_pressed = savedInstanceState.getBoolean(toogle_button_token);
+                    } else{
+                        toggle_button_pressed = MainActivity.db.movieInDataBase(movie);
+                    }
+
+                    toggle.setChecked(toggle_button_pressed);
+
+
+                    toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked) {
+                                MainActivity.db.insertMovie(movie);
+                                toggle_button_pressed = true;
+
+
+                            } else {
+                                MainActivity.db.deleteMovie(movie);
+                                toggle_button_pressed = false;
+
+                            }
+                        }
+                    });
+
+
 
                     /*
                     //Movie reviews
@@ -114,4 +150,21 @@ public class DetailActivity extends AppCompatActivity {
 
         }
     }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        toggle_button_pressed = (savedInstanceState.getBoolean(toogle_button_token));
+        Log.d("PRESSED 2",String.valueOf(toggle_button_pressed));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        Log.d("PRESSED 1",String.valueOf(toggle_button_pressed));
+        outState.putBoolean(toogle_button_token, toggle_button_pressed);
+        // call superclass to save any view hierarchy
+        super.onSaveInstanceState(outState);
+    }
+
+
 }

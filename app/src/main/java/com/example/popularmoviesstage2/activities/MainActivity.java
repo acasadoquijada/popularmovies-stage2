@@ -34,15 +34,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     private MovieAdapter mAdapter;
     private RecyclerView mMovieGrid;
     private ArrayList<Movie> mMovies;
+    private ArrayList<Movie> mFavoriteMovies;
 
     private String previousSortOption = "";
     private String currentSortOption = "";
+    private String appName = "";
 
     public static String bundle_token = "token";
     public static String parcelable_token = "parcelable";
+    private static String movies_token = "movies";
+    private static String favorite_movies_token = "favorite_movies";
+    private static String previous_sort_option_token = "previousSortOption";
+    private static String current_sort_option_token = "currentSortOption";
+    private static String title_token = "title";
+    private String favorite_option = "favorite";
+
 
     public static DataBaseHelper db;
-
 
     /**
      * Creates different objects needed for the MovieAdapter and request the popular movies
@@ -54,10 +62,24 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        previousSortOption = "";
-        currentSortOption = NetworkUtils.popular;
+        if (savedInstanceState != null) {
+            mMovies = savedInstanceState.getParcelableArrayList(movies_token);
+            mFavoriteMovies = savedInstanceState.getParcelableArrayList(favorite_movies_token);
+            previousSortOption = savedInstanceState.getString(previous_sort_option_token);
+            currentSortOption = savedInstanceState.getString(current_sort_option_token);
+            appName = savedInstanceState.getString(title_token);
+            this.setTitle(appName);
 
-        mMovies = new ArrayList<>();
+        } else{
+            previousSortOption = "";
+            currentSortOption = NetworkUtils.popular;
+
+            mMovies = new ArrayList<>();
+            mFavoriteMovies = new ArrayList<>();
+
+            appName = getString(R.string.app_name_sort_popular);
+            this.setTitle(appName);
+        }
 
         mMovieGrid = findViewById(R.id.MovieRecyclerView);
 
@@ -65,14 +87,42 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         mMovieGrid.setLayoutManager(gridLayoutManager);
 
-        new FetchMoviesTask().execute(currentSortOption);
+        if(currentSortOption.equals(favorite_option)){
+            mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
+            mMovieGrid.setAdapter(mAdapter);
+        } else{
+            mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
+            mMovieGrid.setAdapter(mAdapter);
+            new FetchMoviesTask().execute(currentSortOption);
+
+        }
 
         // Create database
 
         db = new DataBaseHelper(this);
-        db.clearDatabase();
-
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(movies_token, mMovies);
+        outState.putParcelableArrayList(favorite_movies_token, mFavoriteMovies);
+
+        outState.putString(previous_sort_option_token, previousSortOption);
+        outState.putString(current_sort_option_token, currentSortOption);
+        outState.putString(title_token, appName);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mMovies = savedInstanceState.getParcelableArrayList(movies_token);
+        mFavoriteMovies = savedInstanceState.getParcelableArrayList(favorite_movies_token);
+
+        appName = savedInstanceState.getString(title_token);
+        previousSortOption = savedInstanceState.getString(previous_sort_option_token);
+        currentSortOption = savedInstanceState.getString(current_sort_option_token);
+   }
 
     /**
      * Inflates the menu that handles the movie sorting
@@ -95,38 +145,39 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         int itemThatWasClickedId = item.getItemId();
 
         if (itemThatWasClickedId == R.id.sort_popularity){
+            appName = getString(R.string.app_name_sort_popular);
+            this.setTitle(appName);
             new FetchMoviesTask().execute(NetworkUtils.popular);
             return true;
         }
 
         if (itemThatWasClickedId == R.id.sort_rate){
+            appName = getString(R.string.app_name_sort_rate);
+            this.setTitle(appName);
             new FetchMoviesTask().execute(NetworkUtils.top_rated);
             return true;
         }
 
         if(itemThatWasClickedId == R.id.sort_fav){
+            appName = getString(R.string.app_name_sort_fav);
+            this.setTitle(appName);
+
             ArrayList<Movie> m = db.getMovies();
 
             if(m.size() > 0) {
-                mAdapter.updateData(m);
+                mFavoriteMovies = m;
+                //mAdapter.updateData(mFavoriteMovies);
+
+                mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
+                mMovieGrid.setAdapter(mAdapter);
             }
+
+            currentSortOption = favorite_option;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Initialize the MovieAdapter object.
-     * Is only called when the movies are sorted in a different way. Example:
-     *
-     * Movies are sorted by popular. If I sort again using popular this method won't be called
-     */
-    private void initializeAdapter(){
-
-        mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
-
-        mMovieGrid.setAdapter(mAdapter);
-    }
 
     /**
      * Method in charge of creating a DetailActivity to presents the details of the movie
@@ -139,7 +190,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         Bundle bundle = new Bundle();
 
-        bundle.putParcelable(parcelable_token, mMovies.get(clickedItemIndex));
+        if(currentSortOption.equals(favorite_option)){
+            bundle.putParcelable(parcelable_token, mFavoriteMovies.get(clickedItemIndex));
+        } else{
+            bundle.putParcelable(parcelable_token, mMovies.get(clickedItemIndex));
+        }
 
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
@@ -157,13 +212,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         ProgressDialog progDailog;
 
-        /**
-         * Checks if there is internet connection.
-         * This method has been obtaion from this StackOverflow post:
-         * https://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-times-out
-         * @return true if there is internet connection, false otherwise
-         */
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -174,6 +222,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             progDailog.setCancelable(true);
             progDailog.show();
         }
+
+        /**
+         * Checks if there is internet connection.
+         * This method has been obtaion from this StackOverflow post:
+         * https://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-times-out
+         * @return true if there is internet connection, false otherwise
+         */
+
         private boolean isOnline() {
             try {
                 int timeoutMs = 1500;
@@ -249,15 +305,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             progDailog.dismiss();
 
             if (movies != null) {
-                if(previousSortOption.equals("")){
-                    mMovies = movies;
-                    initializeAdapter();
-                }
-                if(!currentSortOption.equals(previousSortOption)){
-                    mMovies = movies;
-                    mAdapter.updateData(movies);
-                    //initializeAdapter();
-                }
+                mMovies = movies;
+                mAdapter.updateData(movies);
                 previousSortOption = currentSortOption;
             }
         }
