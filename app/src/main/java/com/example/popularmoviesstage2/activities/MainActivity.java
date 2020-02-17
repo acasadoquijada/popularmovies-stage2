@@ -8,9 +8,12 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.popularmoviesstage2.database.DataBaseHelper;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.movie.MovieAdapter;
 import com.example.popularmoviesstage2.R;
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     public static String bundle_token = "token";
     public static String parcelable_token = "parcelable";
 
+    public static DataBaseHelper db;
+
 
     /**
      * Creates different objects needed for the MovieAdapter and request the popular movies
@@ -61,6 +66,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         mMovieGrid.setLayoutManager(gridLayoutManager);
 
         new FetchMoviesTask().execute(currentSortOption);
+
+        // Create database
+
+        db = new DataBaseHelper(this);
+        db.clearDatabase();
 
     }
 
@@ -94,6 +104,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             return true;
         }
 
+        if(itemThatWasClickedId == R.id.sort_fav){
+            ArrayList<Movie> m = db.getMovies();
+
+            if(m.size() > 0) {
+                mAdapter.updateData(m);
+            }
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -108,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
 
         mMovieGrid.setAdapter(mAdapter);
-
     }
 
     /**
@@ -138,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
     class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie> > {
 
-        ProgressDialog mDialog;
+        ProgressDialog progDailog;
 
         /**
          * Checks if there is internet connection.
@@ -147,6 +164,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
          * @return true if there is internet connection, false otherwise
          */
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progDailog = new ProgressDialog(MainActivity.this);
+            progDailog.setMessage("Loading movies!!");
+            progDailog.setIndeterminate(false);
+            progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progDailog.setCancelable(true);
+            progDailog.show();
+        }
         private boolean isOnline() {
             try {
                 int timeoutMs = 1500;
@@ -219,12 +246,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
+            progDailog.dismiss();
 
             if (movies != null) {
-
-                if(!currentSortOption.equals(previousSortOption)){
+                if(previousSortOption.equals("")){
                     mMovies = movies;
                     initializeAdapter();
+                }
+                if(!currentSortOption.equals(previousSortOption)){
+                    mMovies = movies;
+                    mAdapter.updateData(movies);
+                    //initializeAdapter();
                 }
                 previousSortOption = currentSortOption;
             }

@@ -34,6 +34,12 @@
                 app:showAsAction="ifRoom"
                 android:title="@string/popular_movies"/>
 
+            <item
+                android:id="@+id/sort_fav"
+                android:orderInCategory="4"
+                app:showAsAction="ifRoom"
+                android:title="@string/fav_movies"/>
+
         </menu>
     </item>
 

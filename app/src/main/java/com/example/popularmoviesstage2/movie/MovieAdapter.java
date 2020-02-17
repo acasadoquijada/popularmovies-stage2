@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder>{
 
-    private final int mNumberOfItems;
+    private int mNumberOfItems;
     private final GridItemClickListener gridItemClickListener;
     private ArrayList<Movie> mMovies;
 
@@ -39,6 +39,19 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         mMovies = m;
     }
 
+    public void clearData(){
+        mMovies.clear();
+    }
+
+    public void setData(ArrayList<Movie> movies){
+        mMovies = movies;
+    }
+
+    public void updateData(ArrayList<Movie> movies){
+        mMovies = movies;
+        mNumberOfItems = movies.size();
+        notifyDataSetChanged();
+    }
     /**
      * Creates a ViewHolder inflating the layout from an xml file
      * @param viewGroup View group

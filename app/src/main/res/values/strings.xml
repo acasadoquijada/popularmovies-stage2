@@ -2,5 +2,6 @@
     <string name="app_name">Popular Movies</string>
     <string name="top_rate_movies">Rate</string>
     <string name="popular_movies">Popular</string>
+    <string name="fav_movies">Favorites</string>
     <string name="movie_thumbnail">thumbnail</string>
 </resources>

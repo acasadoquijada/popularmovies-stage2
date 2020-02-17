@@ -5,7 +5,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/bottom_linear_layout">
 
         <TextView
             android:id="@+id/title"
@@ -57,8 +58,6 @@
             android:padding="20sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-
     </LinearLayout>
 
 </ScrollView>

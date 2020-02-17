@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.popularmoviesstage2.movie.Movie;
@@ -42,6 +43,7 @@ public class DetailActivity extends AppCompatActivity {
         TextView textViewReleaseDate;
         TextView textViewVoteAverage;
         ImageView imageViewMoviePoster;
+        LinearLayout bottomLinearLayout;
         Intent intent;
         Movie movie;
 
@@ -82,6 +84,29 @@ public class DetailActivity extends AppCompatActivity {
 
                     // Movie trailers
                     Log.d("REVIEWS",movie.getReviews().toString());
+
+                    MainActivity.db.insertMovie(movie);
+
+                    /*
+                    //Movie reviews
+                    String review_text = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+                    bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
+
+                    TextView review_section_title = new TextView(this);
+
+                    review_section_title.setLayoutParams(
+                            new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+                    review_section_title.setText(review_text);
+
+                    review_section_title.setPadding(20,0,0,0);
+
+                    review_section_title.setTextColor(getResources().getColor(android.R.color.black));
+
+                    bottomLinearLayout.addView(review_section_title,bottomLinearLayout.getChildCount());
+                    */
 
                 }
 

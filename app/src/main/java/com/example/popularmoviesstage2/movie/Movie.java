@@ -8,6 +8,7 @@ import java.util.ArrayList;
 /**
  * Represents a movie obtained from api.themoviedb.org
  */
+
 public class Movie implements Parcelable {
 
     private int popularity;
