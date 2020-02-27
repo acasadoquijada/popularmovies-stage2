@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <array name="sort_option_labels">
+        <item>@string/sort_popular_label</item>
+        <item>@string/sort_top_rated_label</item>
+        <item>@string/sort_fav_label</item>
+    </array>
+
+    <array name="sort_option_values">
+        <item>@string/sort_popular_value</item>
+        <item>@string/sort_top_rated_value</item>
+        <item>@string/sort_fav_value</item>
+    </array>
+</resources>

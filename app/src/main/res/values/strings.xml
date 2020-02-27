@@ -8,4 +8,22 @@
     <string name="app_name_sort_popular">Popular Movies sorted by popularity</string>
     <string name="app_name_sort_rate">Popular Movies sorted by rate</string>
     <string name="app_name_sort_fav">Popular Movies sorted by favorite</string>
+
+
+    <!--Labels for sorting-->
+    <string name="sort_label">Sort movies</string>
+    <string name="sort_top_rated_label">Top Rated</string>
+    <string name="sort_popular_label">Popular</string>
+    <string name="sort_fav_label">Favorites</string>
+
+    <!-- Keys for sorting -->
+    <string name="sort_key" translatable="false">sort_movies</string>
+    <string name="sort_top_rated_value" translatable="false">top_rated</string>
+    <string name="sort_popular_value" translatable="false">popular</string>
+    <string name="sort_fav_value" translatable="false">fav</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Settings menu label -->
+    <string name="action_settings">Settings</string>
+
 </resources>

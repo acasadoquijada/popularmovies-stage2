@@ -1,11 +1,13 @@
 package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -136,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.movie_sort_menu, menu);
+        getMenuInflater().inflate(R.menu.sort_menu, menu);
         return true;
     }
 
@@ -148,6 +150,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
+
+        if(itemThatWasClickedId == R.id.action_settings_id){
+            Intent startSettingActivityIntent = new Intent(this,SettingsActivity.class);
+            startActivity(startSettingActivityIntent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setupSharedPreferences(){
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // I get the sort option and act in consequence
+
+        sharedPreferences.getString(getString(R.id.))
 
         if (itemThatWasClickedId == R.id.sort_popularity){
             appName = getString(R.string.app_name_sort_popular);
@@ -177,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             favoriteMoviesShowing = true;
         }
 
-        return super.onOptionsItemSelected(item);
     }
 
 
