@@ -8,11 +8,4 @@
         android:key="@string/sort_key"
         android:title="@string/sort_label"/>
 
-    <CheckBoxPreference
-        android:defaultValue="A"
-        android:key="B"
-        android:summaryOff="Ce"
-        android:summaryOn="D"
-        android:title="F" />
-
 </PreferenceScreen>

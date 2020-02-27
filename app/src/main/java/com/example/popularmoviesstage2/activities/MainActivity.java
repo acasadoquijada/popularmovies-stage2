@@ -1,6 +1,7 @@
 package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +12,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -30,7 +32,8 @@ import java.util.ArrayList;
 /**
  * Main Activity of the Popular Movies Stage 2 application
  */
-public class MainActivity extends AppCompatActivity implements MovieAdapter.GridItemClickListener {
+public class MainActivity extends AppCompatActivity
+        implements MovieAdapter.GridItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static MovieAdapter mAdapter;
     private RecyclerView mMovieGrid;
@@ -85,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
             appName = getString(R.string.app_name_sort_popular);
             this.setTitle(appName);
         }
+
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
 
         mMovieGrid = findViewById(R.id.MovieRecyclerView);
 
@@ -164,37 +170,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // I get the sort option and act in consequence
-
-        sharedPreferences.getString(getString(R.id.))
-
-        if (itemThatWasClickedId == R.id.sort_popularity){
-            appName = getString(R.string.app_name_sort_popular);
-            this.setTitle(appName);
-            new FetchMoviesTask().execute(NetworkUtils.popular);
-            return true;
-        }
-
-        if (itemThatWasClickedId == R.id.sort_rate){
-            appName = getString(R.string.app_name_sort_rate);
-            this.setTitle(appName);
-            new FetchMoviesTask().execute(NetworkUtils.top_rated);
-            return true;
-        }
-
-        if(itemThatWasClickedId == R.id.sort_fav){
-            appName = getString(R.string.app_name_sort_fav);
-            this.setTitle(appName);
-
-            ArrayList<Movie> m = db.getMovies();
-
-            if(m.size() > 0) {
-                mFavoriteMovies = m;
-                mAdapter.updateData(mFavoriteMovies);
-            }
-
-            favoriteMoviesShowing = true;
-        }
 
     }
 
@@ -225,6 +200,52 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Grid
         startActivity(intent);
 
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        Log.d("OPTION__", "HERE");
+        if(key.equals((getString(R.string.sort_key)))){
+
+            String option = sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
+
+            Log.d("OPTION__",option);
+
+            // I get the sort option and act in consequence
+
+/*        sharedPreferences.getString(getString(R.id.))
+
+        if (itemThatWasClickedId == R.id.sort_popularity){
+            appName = getString(R.string.app_name_sort_popular);
+            this.setTitle(appName);
+            new FetchMoviesTask().execute(NetworkUtils.popular);
+            return true;
+        }
+
+        if (itemThatWasClickedId == R.id.sort_rate){
+            appName = getString(R.string.app_name_sort_rate);
+            this.setTitle(appName);
+            new FetchMoviesTask().execute(NetworkUtils.top_rated);
+            return true;
+        }
+
+        if(itemThatWasClickedId == R.id.sort_fav){
+            appName = getString(R.string.app_name_sort_fav);
+            this.setTitle(appName);
+
+            ArrayList<Movie> m = db.getMovies();
+
+            if(m.size() > 0) {
+                mFavoriteMovies = m;
+                mAdapter.updateData(mFavoriteMovies);
+            }
+
+            favoriteMoviesShowing = true;
+        }
+*/        }
+    }
+
+
 
     /**
      * AsyncTask that request the movies to the API and initialize the MovieAdapter if needed
