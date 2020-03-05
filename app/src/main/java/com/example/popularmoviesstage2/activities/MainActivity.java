@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView mMovieGrid;
     private ArrayList<Movie> mMovies;
     private ArrayList<Movie> mFavoriteMovies;
+    private ArrayList<Movie> mMyMovies;
 
     private String previousSortOption = "";
     private String currentSortOption = "";
@@ -74,42 +75,39 @@ public class MainActivity extends AppCompatActivity
             previousSortOption = savedInstanceState.getString(previous_sort_option_token);
             currentSortOption = savedInstanceState.getString(current_sort_option_token);
             favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
-            appName = savedInstanceState.getString(title_token);
-            this.setTitle(appName);
 
         } else{
             previousSortOption = "";
-            currentSortOption = NetworkUtils.popular;
-
             mMovies = new ArrayList<>();
             mFavoriteMovies = new ArrayList<>();
 
             favoriteMoviesShowing = false;
-            appName = getString(R.string.app_name_sort_popular);
-            this.setTitle(appName);
         }
 
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
+        setupSharedPreferences();
 
+        mMyMovies = new ArrayList<>();
+        // Create database
+
+        db = new DataBaseHelper(this);
         mMovieGrid = findViewById(R.id.MovieRecyclerView);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
 
         mMovieGrid.setLayoutManager(gridLayoutManager);
 
-        if(favoriteMoviesShowing){
+        // Get the movies according to the sort option selected
+
+        if(currentSortOption.equals(getString(R.string.sort_fav_value))){
+            mFavoriteMovies = db.getMovies();
             mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
-            mMovieGrid.setAdapter(mAdapter);
+
         } else{
             mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
-            mMovieGrid.setAdapter(mAdapter);
             new FetchMoviesTask().execute(currentSortOption);
         }
 
-        // Create database
-
-        db = new DataBaseHelper(this);
+        mMovieGrid.setAdapter(mAdapter);
     }
 
     @Override
@@ -169,7 +167,10 @@ public class MainActivity extends AppCompatActivity
     private void setupSharedPreferences(){
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+        currentSortOption =
+                sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
 
     }
 
@@ -201,51 +202,44 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private boolean needToRequestMovies(String current, String previous){
+        return false;
+    }
+
+    // Fav -> rotate -> popular
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        Log.d("OPTION__", "HERE");
         if(key.equals((getString(R.string.sort_key)))){
 
             String option = sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
 
-            Log.d("OPTION__",option);
-
-            // I get the sort option and act in consequence
-
-/*        sharedPreferences.getString(getString(R.id.))
-
-        if (itemThatWasClickedId == R.id.sort_popularity){
-            appName = getString(R.string.app_name_sort_popular);
-            this.setTitle(appName);
-            new FetchMoviesTask().execute(NetworkUtils.popular);
-            return true;
-        }
-
-        if (itemThatWasClickedId == R.id.sort_rate){
-            appName = getString(R.string.app_name_sort_rate);
-            this.setTitle(appName);
-            new FetchMoviesTask().execute(NetworkUtils.top_rated);
-            return true;
-        }
-
-        if(itemThatWasClickedId == R.id.sort_fav){
-            appName = getString(R.string.app_name_sort_fav);
-            this.setTitle(appName);
-
-            ArrayList<Movie> m = db.getMovies();
-
-            if(m.size() > 0) {
-                mFavoriteMovies = m;
-                mAdapter.updateData(mFavoriteMovies);
+            if(option.equals(getString(R.string.sort_popular_value))) {
+                new FetchMoviesTask().execute(NetworkUtils.popular);
             }
 
-            favoriteMoviesShowing = true;
+            if(option.equals(getString(R.string.sort_top_rated_value))) {
+                new FetchMoviesTask().execute(NetworkUtils.top_rated);
+            }
+
+            if(option.equals(getString(R.string.sort_fav_value))) {
+                ArrayList<Movie> m = db.getMovies();
+
+                if(m.size() > 0) {
+                    mFavoriteMovies = m;
+                    mAdapter.updateData(mFavoriteMovies);
+                }
+            }
         }
-*/        }
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
 
     /**
      * AsyncTask that request the movies to the API and initialize the MovieAdapter if needed
@@ -307,7 +301,7 @@ public class MainActivity extends AppCompatActivity
                     return null;
                 }
 
-                if (!previousSortOption.equals(strings[0])) {
+      //          if (!previousSortOption.equals(strings[0])) {
 
                     try {
 
@@ -334,9 +328,9 @@ public class MainActivity extends AppCompatActivity
                         return null;
                     }
 
-                }
+        //        }
 
-                return mMovies;
+          //      return mMovies;
             }
             return null;
         }
@@ -352,10 +346,8 @@ public class MainActivity extends AppCompatActivity
             progDailog.dismiss();
 
             if (movies != null) {
-                mMovies = movies;
                 mAdapter.updateData(movies);
-                previousSortOption = currentSortOption;
-                favoriteMoviesShowing = false;
+                mAdapter.notifyDataSetChanged();
             }
         }
     }

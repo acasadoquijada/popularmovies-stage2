@@ -13,8 +13,6 @@ import androidx.preference.PreferenceScreen;
 
 import com.example.popularmoviesstage2.R;
 
-import java.util.List;
-
 public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener{
     @Override
@@ -31,6 +29,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
             String value = sharedPreferences.getString(p.getKey(),"");
             setPreferenceSummary(p,value);
         }
+
+
     }
 
     private void setPreferenceSummary(Preference preference, String value){
