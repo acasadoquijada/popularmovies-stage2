@@ -1,12 +1,18 @@
 package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -121,10 +127,12 @@ public class DetailActivity extends AppCompatActivity {
                         }
                     });
 
+                    neoAddTrailers(movie);
+                    neoAddReviews(movie);
                     // Movie trailers
-                    AddMovieTrailers(movie);
+                    //AddMovieTrailers(movie);
                     // Movie reviews
-                    addMovieReviews(movie);
+                    //addMovieReviews(movie);
 
                 }
 
@@ -133,15 +141,123 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    public void neoAddReviews(Movie movie){
+
+        // Get the parent layout
+
+        LinearLayout contraConstraintLayout = findViewById(R.id.review_linear_layout);
+
+        if(contraConstraintLayout != null) {
+
+            // This is because the reviews are stored as follow:
+            // 0: Author, 1: Review, 2: Author, 3: Review...
+            // See parseContentReview and parseAuthor review for more details
+
+            int review_number = movie.getReviews().size() / 2;
+
+            for (int i = 0; i < review_number; i+=2) {
+                // Inflate review_layout
+
+                LayoutInflater inflater = LayoutInflater.from(this);
+
+                View reviewLayout = inflater.inflate(R.layout.review_layout, null);
+
+                // Get the review author textView
+
+                TextView authorTextView = reviewLayout.findViewById(R.id.review_author);
+
+                // Get the review content textView
+
+                TextView contentTextView = reviewLayout.findViewById(R.id.review_text);
+
+                // Set review author text
+
+                String author_review = movie.getReviews().get(i);
+
+                authorTextView.setText(author_review);
+
+                Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
+
+                authorTextView.setTypeface(boldTypeface);
+
+                // Set review content text
+
+                String content_review = movie.getReviews().get(i + 1);
+
+                contentTextView.setText(content_review);
+
+                // Set review layout params
+
+                ConstraintLayout.LayoutParams l = new ConstraintLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                reviewLayout.setLayoutParams(l);
+
+                contraConstraintLayout.addView(reviewLayout, contraConstraintLayout.getChildCount());
+            }
+        }
+    }
+
+
+
+    public void neoAddTrailers(Movie movie){
+
+        LinearLayout contraConstraintLayout = findViewById(R.id.trailer_linear_layout);
+
+        // This is because the trailers are stored as follow:
+        // 0: Name, 1: Trailer, 2: Name, 3: Trailer...
+        // See parseTrailerURL and parseTrailerName review for more details
+        int trailer_number = movie.getTrailers().size()/2;
+
+        for(int i = 0; i < trailer_number; i+=2) {
+
+            // Inflate trailer_layout
+
+            LayoutInflater inflater = LayoutInflater.from(this);
+
+            View trailerLayout = inflater.inflate(R.layout.trailer_layout, null);
+
+            // Get the trailer imageView
+
+            ImageView trailerImageView = trailerLayout.findViewById(R.id.trailer_image_view);
+
+            // Get the trailer textView
+
+            TextView trailerTextView = trailerLayout.findViewById(R.id.trailer_text_view);
+
+            // Set trailer textView text
+
+            String trailer_text = "Trailer" +  " " + i;
+            trailerTextView.setText(movie.getTrailers().get(i));
+
+            // Set trailer video
+
+//            setOnClick(trailerImageView,movie.getTrailers().get(i+1));
+
+            setOnClick(trailerLayout,movie.getTrailers().get(i+1));
+            // Set trailer layout params
+
+            ConstraintLayout.LayoutParams l = new ConstraintLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            trailerLayout.setLayoutParams(l);
+
+            contraConstraintLayout.addView(trailerLayout, contraConstraintLayout.getChildCount());
+
+        }
+    }
+
 
     /**
      * Adds the views necessaries to display the trailers of a given movie
-     * @param movie to obtain the trailers from
+     * @param movie to obtain the trailers fro
      */
     private void AddMovieTrailers(Movie movie){
 
         // Get parent layout
-        LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
+      /*  LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
 
         // Create TextView to present trailer section
         TextView trailer_section_title = getTitleSection("Trailers");
@@ -174,7 +290,7 @@ public class DetailActivity extends AppCompatActivity {
             trailerLinearLayout.addView(trailerImageView,trailerLinearLayout.getChildCount());
         }
 
-        bottomLinearLayout.addView(trailerLinearLayout,bottomLinearLayout.getChildCount());
+        bottomLinearLayout.addView(trailerLinearLayout,bottomLinearLayout.getChildCount());*/
     }
 
     /**
@@ -182,7 +298,8 @@ public class DetailActivity extends AppCompatActivity {
      * @param imageView corresponding to the trailer
      * @param trailer_path trailer youtube link
      */
-    private void setOnClick(final ImageView imageView, final String trailer_path){
+    private void setOnClick(final View imageView, final String trailer_path){
+
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -263,9 +380,9 @@ public class DetailActivity extends AppCompatActivity {
 
     /**
      * Adds the views necessaries to display the reviews of a given movie
-     * @param movie to obtain the reviews from
+     * movie to obtain the reviews from
      */
-    private void addMovieReviews(Movie movie){
+    /*private void addMovieReviews(Movie movie){
 
         // Get trailerLinearLayout layout
         LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
@@ -305,7 +422,7 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         bottomLinearLayout.addView(reviewLinearLayout,bottomLinearLayout.getChildCount());
-    }
+    }*/
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {

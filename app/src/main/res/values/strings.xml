@@ -26,4 +26,8 @@
     <!-- Settings menu label -->
     <string name="action_settings">Settings</string>
 
+    <!-- Label for the review and trailer section in Detail Activity -->
+    <string name="review_label">Reviews</string>
+    <string name="trailer_label">Trailers</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package com.example.popularmoviesstage2.utilities;
 
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,6 +101,7 @@ public class NetworkUtils {
 
     public static String getTrailersMovie(int movie_id) throws IOException {
         URL trailersMovie = buildMovieExtraInfoUrl(movie_id,videos_token);
+        Log.d("TRAILER_TAG",trailersMovie.toString());
         return getResponseFromHttpUrl(trailersMovie);
     }
 
@@ -111,6 +113,8 @@ public class NetworkUtils {
 
     public static String getReviewsMovie(int movie_id) throws IOException {
         URL trailersMovie = buildMovieExtraInfoUrl(movie_id, reviews_token);
+
+        Log.d("REVIEW_TAG",trailersMovie.toString());
         return getResponseFromHttpUrl(trailersMovie);
     }
 

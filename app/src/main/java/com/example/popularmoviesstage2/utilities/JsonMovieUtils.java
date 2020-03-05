@@ -30,8 +30,10 @@ public class JsonMovieUtils {
     private final static String vote_average_token = "vote_average";
     private final static String overview_token= "overview";
     private final static String release_date_token = "release_date";
-    private final static String key_token = "key";
+    private final static String trailer_key_token = "key";
+    private final static String trailer_name_token = "name";
     private final static String review_content_key = "content";
+    private final static String review_author_key = "author";
 
 
     /**
@@ -204,7 +206,8 @@ public class JsonMovieUtils {
 
                 JSONObject jsonTrailer = JSONTrailerArray.getJSONObject(i);
 
-                trailers.add(parseTrailer(jsonTrailer));
+                trailers.add(parseTrailerName(jsonTrailer));
+                trailers.add(parseTrailerURL(jsonTrailer));
             }
 
             return trailers;
@@ -221,18 +224,37 @@ public class JsonMovieUtils {
      * @param json with the trailer
      * @return string trailer
      */
-    static private String parseTrailer(JSONObject json){
+    static private String parseTrailerURL(JSONObject json){
 
         try {
-            String trailer_path = "https://www.youtube.com/watch?v=";
-            trailer_path += json.getString(key_token);
+            String trailer_url = "https://www.youtube.com/watch?v=";
+            trailer_url += json.getString(trailer_key_token);
 
-            return trailer_path;
+            return trailer_url;
 
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    static private String parseTrailerName(JSONObject json){
+
+        try {
+            String trailer_name = json.getString(trailer_name_token);
+
+            if(trailer_name.equals("")){
+                return "Trailer";
+            }
+
+            return trailer_name;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+
     }
 
     /**
@@ -248,14 +270,15 @@ public class JsonMovieUtils {
             ArrayList<String> reviews = new ArrayList<>();
 
             JSONObject JSONObjectResultQuery = new JSONObject(string_reviews);
-            JSONArray JSONTrailerArray = JSONObjectResultQuery.getJSONArray(results_token);
+            JSONArray JSONReviewArray = JSONObjectResultQuery.getJSONArray(results_token);
 
 
-            for (int i = 0; i < JSONTrailerArray.length(); i++) {
+            for (int i = 0; i < JSONReviewArray.length(); i++) {
 
-                JSONObject jsonTrailer = JSONTrailerArray.getJSONObject(i);
+                JSONObject jsonReview = JSONReviewArray.getJSONObject(i);
 
-                reviews.add(parseReview(jsonTrailer));
+                reviews.add(parseAuthorReview(jsonReview));
+                reviews.add(parseContentReview(jsonReview));
             }
 
             return reviews;
@@ -272,10 +295,26 @@ public class JsonMovieUtils {
      * @param json containing the review
      * @return string review
      */
-    private static String parseReview(JSONObject json){
+    private static String parseContentReview(JSONObject json){
 
         try {
             return json.getString(review_content_key);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+
+        }
+    }
+
+    private static String parseAuthorReview(JSONObject json){
+        try {
+
+            String author = json.getString(review_author_key);
+
+            if(author.equals("")){
+                return "unknown author";
+            }
+            return author;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

@@ -14,7 +14,7 @@ This application is built on top of [Popular Movies Stage 1](https://github.com/
  * Added sort option to sort by favorites
  * The favorites movies are stored in a SQLite DataBase
 	
-## Application class structure
+## Application class structure (TO DO: UPDATE)
 
     |-- activities package
     |   |-- DetailActivity.java
@@ -53,3 +53,8 @@ This application is built on top of [Popular Movies Stage 1](https://github.com/
 You need to register in themoviedb.org to obtain a key for their API in order to use this app.
 
 The key goes in the NetworkUtils.java class of the utilties package line 26. [shortcut](https://github.com/acasadoquijada/popularmovies-stage2/blob/master/app/src/main/java/com/example/popularmoviesstage2/utilities/NetworkUtils.java#L26)
+
+## Logos
+
+The res > drawable > ic_video_camera.xml icon has been designed by Those Icons from flaticom.com. More information here:
+Icons made by <a href="https://www.flaticon.com/authors/those-icons" title="Those Icons">Those Icons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
