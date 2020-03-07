@@ -3,30 +3,40 @@ package com.example.popularmoviesstage2.movie;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.example.popularmoviesstage2.database.MovieConverter;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a movie obtained from api.themoviedb.org
  */
 
+@Entity(tableName = "movies")
 public class Movie implements Parcelable {
 
+    @PrimaryKey
+    private int id;
     private int popularity;
     private int vote_count;
-    private boolean video;
     private String poster_path;
-    private int id;
-    private boolean adult;
     private String backdrop_path;
     private String original_language;
     private String original_title;
-    private int[] genre_ids;
     private String title;
     private double vote_average;
     private String overview;
     private String release_date;
-    private ArrayList<String> trailers;
-    private ArrayList<String> reviews;
+    private List<String> trailers;
+    private List<String> reviews;
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     /**
      * Empty constructor
@@ -43,14 +53,11 @@ public class Movie implements Parcelable {
     private Movie(Parcel in) {
         popularity = in.readInt();
         vote_count = in.readInt();
-        video = (Boolean) in.readValue(null);
         poster_path = in.readString();
         id = in.readInt();
-        adult = (Boolean) in.readValue(null);
         backdrop_path = in.readString();
         original_language = in.readString();
         original_title = in.readString();
-        genre_ids = in.createIntArray();
         title = in.readString();
         vote_average = in.readDouble();
         overview = in.readString();
@@ -84,10 +91,6 @@ public class Movie implements Parcelable {
         this.vote_count = vote_count;
     }
 
-    public void setVideo(boolean video) {
-        this.video = video;
-    }
-
     public int getId() {
         return id;
     }
@@ -96,9 +99,6 @@ public class Movie implements Parcelable {
         this.id = id;
     }
 
-    public void setAdult(boolean adult) {
-        this.adult = adult;
-    }
 
     public void setBackdrop_path(String backdrop_path) {
         this.backdrop_path = backdrop_path;
@@ -144,16 +144,46 @@ public class Movie implements Parcelable {
         return poster_path;
     }
 
+    public int getPopularity() {
+        return popularity;
+    }
+
+    public int getVote_count() {
+        return vote_count;
+    }
+
+    public String getBackdrop_path() {
+        return backdrop_path;
+    }
+
+    public String getOriginal_language() {
+        return original_language;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
     /**
      * Sets the correct url to the movie's poster taking into account
      * the size of the poster
-     * @param poster_path String identificator of the movie's poster
+     *
+     * As Room uses this set, a check is performed to to avoid path malformation
+     * @param poster_path String that identifies movie's poster
      */
 
     public void setPoster_path(String poster_path) {
-        final String base_url = "https://image.tmdb.org/t/p/";
-        final String size = "w185";
-        this.poster_path =  base_url + size + poster_path;
+
+        // The Movie object is stored with its correct path (https://image...)
+        // Because of this, once Room recreate the object, we can just set
+        // the store path as the correct path
+        if(poster_path.substring(0,4).equals("http")){
+            this.poster_path = poster_path;
+        } else {
+            final String base_url = "https://image.tmdb.org/t/p/";
+            final String size = "w185";
+            this.poster_path =  base_url + size + poster_path;
+        }
     }
 
     @Override
@@ -170,14 +200,11 @@ public class Movie implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(popularity);
         dest.writeInt(vote_count);
-        dest.writeValue(video);
         dest.writeString(poster_path);
         dest.writeInt(id);
-        dest.writeValue(adult);
         dest.writeString(backdrop_path);
         dest.writeString(original_language);
         dest.writeString(original_title);
-        dest.writeIntArray(genre_ids);
         dest.writeString(title);
         dest.writeDouble(vote_average);
         dest.writeString(overview);
@@ -186,19 +213,21 @@ public class Movie implements Parcelable {
         dest.writeStringList(reviews);
     }
 
-    public ArrayList<String> getTrailers() {
+    @TypeConverters({MovieConverter.class})
+    public List<String> getTrailers() {
         return trailers;
     }
 
-    public void setTrailers(ArrayList<String> trailers) {
+    public void setTrailers(List<String> trailers) {
         this.trailers = trailers;
     }
 
-    public ArrayList<String> getReviews() {
+    @TypeConverters({MovieConverter.class})
+    public List<String> getReviews() {
         return reviews;
     }
 
-    public void setReviews(ArrayList<String> reviews) {
+    public void setReviews(List<String> reviews) {
         this.reviews = reviews;
     }
 }

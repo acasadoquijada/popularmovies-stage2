@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.example.popularmoviesstage2.database.MovieDataBase;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.R;
 import com.squareup.picasso.Picasso;
@@ -31,6 +32,7 @@ import com.squareup.picasso.Picasso;
 public class DetailActivity extends AppCompatActivity {
 
     private Movie movie;
+    private MovieDataBase movieDataBase;
     private final String toogle_button_token = "toogle_button";
     private boolean toggle_button_pressed;
     private int pos;
@@ -58,6 +60,9 @@ public class DetailActivity extends AppCompatActivity {
         TextView textViewReleaseDate;
         TextView textViewVoteAverage;
         ImageView imageViewMoviePoster;
+
+        movieDataBase = MovieDataBase.getInstance(getApplicationContext());
+
         Intent intent;
 
         intent = getIntent();
@@ -104,7 +109,10 @@ public class DetailActivity extends AppCompatActivity {
                     if (savedInstanceState != null) {
                         toggle_button_pressed = savedInstanceState.getBoolean(toogle_button_token);
                     } else{
-                        toggle_button_pressed = MainActivity.db.movieInDataBase(movie);
+                        // This means that the movie is in the DB, then we set the button as pressed
+                        if(movieDataBase.movieDAO().getMovie(movie.getId()) != null){
+                            toggle_button_pressed = true;
+                        }
                     }
 
                     toggle.setChecked(toggle_button_pressed);
@@ -112,12 +120,14 @@ public class DetailActivity extends AppCompatActivity {
                     toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                             if (isChecked) {
-                                MainActivity.db.insertMovie(movie);
+                                movieDataBase.movieDAO().insertMovie(movie);
+                                //MainActivity.db.insertMovie(movie);
                                 toggle_button_pressed = true;
 
 
                             } else {
-                                MainActivity.db.deleteMovie(movie);
+                                movieDataBase.movieDAO().deleteMovie(movie);
+                                //MainActivity.db.deleteMovie(movie);
 
                                 if(pos != -1)
                                     MainActivity.mAdapter.removeMovie(pos);

@@ -1,6 +1,8 @@
 package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -17,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.popularmoviesstage2.database.DataBaseHelper;
+import com.example.popularmoviesstage2.database.MovieDataBase;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.movie.MovieAdapter;
 import com.example.popularmoviesstage2.R;
@@ -28,6 +31,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main Activity of the Popular Movies Stage 2 application
@@ -37,9 +41,8 @@ public class MainActivity extends AppCompatActivity
 
     public static MovieAdapter mAdapter;
     private RecyclerView mMovieGrid;
-    private ArrayList<Movie> mMovies;
-    private ArrayList<Movie> mFavoriteMovies;
-    private ArrayList<Movie> mMyMovies;
+    private List<Movie> mMovies;
+    private List<Movie> mFavoriteMovies;
 
     private String previousSortOption = "";
     private String currentSortOption = "";
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity
     public static final String parcelable_token = "parcelable";
     public static final String movie_pos_token = "movie_pos";
 
+    private String sort_option = "";
     private final String movies_token = "movies";
     private final String favorite_movies_token = "favorite_movies";
     private final String favorite_movies_showing_token = "favorite_movies_showing";
@@ -57,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private final String current_sort_option_token = "currentSortOption";
     private final String title_token = "title";
 
-    public static DataBaseHelper db;
+    private MovieDataBase movieDataBase;
 
     /**
      * Creates different objects needed for the MovieAdapter and request the popular movies
@@ -71,7 +75,6 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(movies_token);
-            mFavoriteMovies = savedInstanceState.getParcelableArrayList(favorite_movies_token);
             previousSortOption = savedInstanceState.getString(previous_sort_option_token);
             currentSortOption = savedInstanceState.getString(current_sort_option_token);
             favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
@@ -79,17 +82,17 @@ public class MainActivity extends AppCompatActivity
         } else{
             previousSortOption = "";
             mMovies = new ArrayList<>();
-            mFavoriteMovies = new ArrayList<>();
 
             favoriteMoviesShowing = false;
         }
 
         setupSharedPreferences();
-
-        mMyMovies = new ArrayList<>();
         // Create database
 
-        db = new DataBaseHelper(this);
+        mFavoriteMovies = new ArrayList<>();
+        movieDataBase = MovieDataBase.getInstance(getApplicationContext());
+        retrieveFavoriteMovies();
+
         mMovieGrid = findViewById(R.id.MovieRecyclerView);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
@@ -98,13 +101,14 @@ public class MainActivity extends AppCompatActivity
 
         // Get the movies according to the sort option selected
 
-        if(currentSortOption.equals(getString(R.string.sort_fav_value))){
-            mFavoriteMovies = db.getMovies();
-            mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
+        if(sort_option.equals(getString(R.string.sort_fav_value))){
+            mFavoriteMovies = movieDataBase.movieDAO().getMovies().getValue();
+            if(mFavoriteMovies != null)
+                mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
 
-        } else{
+        } else {
             mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
-            new FetchMoviesTask().execute(currentSortOption);
+            new FetchMoviesTask().execute(sort_option);
         }
 
         mMovieGrid.setAdapter(mAdapter);
@@ -112,8 +116,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(movies_token, mMovies);
-        outState.putParcelableArrayList(favorite_movies_token, mFavoriteMovies);
+     //   outState.putParcelableArrayList(movies_token, mMovies);
+       // outState.putParcelableArrayList(favorite_movies_token, mFavoriteMovies);
 
         outState.putString(previous_sort_option_token, previousSortOption);
         outState.putString(current_sort_option_token, currentSortOption);
@@ -126,7 +130,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         mMovies = savedInstanceState.getParcelableArrayList(movies_token);
-        mFavoriteMovies = savedInstanceState.getParcelableArrayList(favorite_movies_token);
 
         appName = savedInstanceState.getString(title_token);
         previousSortOption = savedInstanceState.getString(previous_sort_option_token);
@@ -169,9 +172,7 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        currentSortOption =
-                sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
-
+        sort_option = sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
     }
 
 
@@ -211,25 +212,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        if(key.equals((getString(R.string.sort_key)))){
+        if(key.equals((getString(R.string.sort_key)))) {
 
-            String option = sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
+            sort_option = sharedPreferences.getString(getString(R.string.sort_key), getString(R.string.sort_popular_label));
 
-            if(option.equals(getString(R.string.sort_popular_value))) {
+            if (sort_option.equals(getString(R.string.sort_popular_value))) {
                 new FetchMoviesTask().execute(NetworkUtils.popular);
             }
 
-            if(option.equals(getString(R.string.sort_top_rated_value))) {
+            if (sort_option.equals(getString(R.string.sort_top_rated_value))) {
                 new FetchMoviesTask().execute(NetworkUtils.top_rated);
             }
 
-            if(option.equals(getString(R.string.sort_fav_value))) {
-                ArrayList<Movie> m = db.getMovies();
-
-                if(m.size() > 0) {
-                    mFavoriteMovies = m;
-                    mAdapter.updateData(mFavoriteMovies);
-                }
+            if (sort_option.equals(getString(R.string.sort_fav_value))) {
+                mAdapter.updateData(mFavoriteMovies);
+                //retrieveFavoriteMovies();
             }
         }
     }
@@ -241,6 +238,20 @@ public class MainActivity extends AppCompatActivity
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
+    private void retrieveFavoriteMovies(){
+        final LiveData<List<Movie>> movies = movieDataBase.movieDAO().getMovies();
+
+        movies.observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(List<Movie> movies) {
+                if(mFavoriteMovies != null){
+                    mFavoriteMovies = movies;
+                }
+
+            }
+        });
+
+    }
     /**
      * AsyncTask that request the movies to the API and initialize the MovieAdapter if needed
      */
@@ -345,7 +356,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(ArrayList<Movie> movies) {
             progDailog.dismiss();
 
-            if (movies != null) {
+            if (movies != null && movies.size() > 0) {
                 mAdapter.updateData(movies);
                 mAdapter.notifyDataSetChanged();
             }

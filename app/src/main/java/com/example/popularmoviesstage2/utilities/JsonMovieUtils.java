@@ -123,11 +123,6 @@ public class JsonMovieUtils {
 
             movie.setVote_count(vote_count);
 
-            // Video
-            video = jsonMovie.getBoolean(video_token);
-
-            movie.setVideo(video);
-
             // Poster path
             poster_path = jsonMovie.getString(poster_path_token);
 
@@ -137,11 +132,6 @@ public class JsonMovieUtils {
             id = jsonMovie.getInt(id_token);
 
             movie.setId(id);
-
-            // Adult
-            adult = jsonMovie.getBoolean(adult_token);
-
-            movie.setAdult(adult);
 
             // Backdrop path
             backdrop_path = jsonMovie.getString(backdrop_path_token);

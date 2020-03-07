@@ -14,6 +14,7 @@ import com.example.popularmoviesstage2.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -25,7 +26,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private int mNumberOfItems;
     private final GridItemClickListener gridItemClickListener;
-    private ArrayList<Movie> mMovies;
+    private List<Movie> mMovies;
 
     /**
      * Constructor method
@@ -34,13 +35,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      * @param m ArrayList of movies
      */
 
-    public MovieAdapter(int numberOfItems, GridItemClickListener listener,ArrayList<Movie> m){
+    public MovieAdapter(int numberOfItems, GridItemClickListener listener,List<Movie> m){
         mNumberOfItems = numberOfItems;
         gridItemClickListener = listener;
         mMovies = m;
     }
 
-    public void updateData(ArrayList<Movie> movies){
+    public void updateData(List<Movie> movies){
         mMovies.clear();
         mMovies.addAll(movies);
         mNumberOfItems = mMovies.size();
