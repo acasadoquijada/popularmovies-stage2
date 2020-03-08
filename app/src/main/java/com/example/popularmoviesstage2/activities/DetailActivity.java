@@ -145,7 +145,6 @@ public class DetailActivity extends AppCompatActivity {
                                     MainActivity.mAdapter.removeMovie(pos);
                                 }
                             });
-
                         }
                     });
                 }

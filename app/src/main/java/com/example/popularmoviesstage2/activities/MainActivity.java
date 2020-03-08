@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,6 +29,8 @@ import com.example.popularmoviesstage2.R;
 import com.example.popularmoviesstage2.utilities.AppExecutor;
 import com.example.popularmoviesstage2.utilities.JsonMovieUtils;
 import com.example.popularmoviesstage2.utilities.NetworkUtils;
+import com.example.popularmoviesstage2.viewmodel.MainViewModel;
+import com.example.popularmoviesstage2.viewmodel.MovieAPIViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +43,10 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static MovieAdapter mAdapter;
-    private List<Movie> mMovies;
+    private static List<Movie> mMovies;
     private List<Movie> mFavoriteMovies;
     private String mSortOption = "";
+    private MovieAPIViewModel viewModel;
 
     public static final String bundle_token = "token";
     public static final String parcelable_token = "parcelable";
@@ -79,7 +83,7 @@ public class MainActivity extends AppCompatActivity
         // If landscape is used the number of columns in the GridLayout will be
         // higher due to having more space
 
-        int columns = 0;
+        int columns = 1;
 
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -102,7 +106,11 @@ public class MainActivity extends AppCompatActivity
         // Setup movies lists. This will change with the use of ViewModel
 
         mMovies = new ArrayList<>();
-        retrieveFavoriteMovies();
+        mFavoriteMovies = new ArrayList<>();
+
+        setupViewModel();
+
+        viewModel = ViewModelProviders.of(this).get(MovieAPIViewModel.class);
 
         // Query movies
         queryMovies(mSortOption);
@@ -211,16 +219,36 @@ public class MainActivity extends AppCompatActivity
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    private void retrieveFavoriteMovies(){
-        final LiveData<List<Movie>> movies = movieDataBase.movieDAO().getMovies();
+    private void setupViewModel(){
 
-        movies.observe(this, new Observer<List<Movie>>() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getFav_movies().observe(this, new Observer<List<Movie>>() {
+
+            // The logic of onChanged is the following:
+            // We use ModelView to avoid non-necessary queries to the favorite movie database
+            // Besides, we are going to use the onChanged method for two purposes:
+            // 1) Update mFavoriteMovies when a movie is mark/unmarked as fav. Then we need just to
+            // call mAdapter.update() when the sort option is fav movies
+            // 2) If there's been a change, the on the data AND the sort option is fav movies
+            // we call to mAdapter.update(). This is used when the app is started with this option
+            // and when there's a movie deletion
+
             @Override
             public void onChanged(List<Movie> movies) {
-                    mFavoriteMovies = movies;
+                Log.d("VIEW_MODEL","Updating Fav Movies from ViewModel");
+                Log.d("VIEW_MODEL",String.valueOf(movies.size()));
+
+                mFavoriteMovies = movies;
+                if (mSortOption.equals(getString(R.string.sort_fav_value))) {
+                    mAdapter.updateData(mFavoriteMovies);
+                }
             }
         });
 
+    }
+
+    public static void setMovies(List<Movie> m){
+        mMovies = m;
     }
 
     private void queryMovies(final String query) {
@@ -238,24 +266,40 @@ public class MainActivity extends AppCompatActivity
         // as we are using LiveData
 
         if (mSortOption.equals(getString(R.string.sort_fav_value))) {
-            AppExecutor.getsInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    mFavoriteMovies = movieDataBase.movieDAO().getMoviesNoLiveData();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter.updateData(mFavoriteMovies);
-                            progDailog.dismiss();
-                        }
-                    });
-                }
-            });
+            mAdapter.updateData(mFavoriteMovies);
+            progDailog.dismiss();
         }
 
-        // Request the movies to the API
         else {
+            if(isOnline()){
+                viewModel.requestMovie(mSortOption);
+                progDailog.dismiss();
+            } else {
+                // If there is no internet connection show message
+                // Code obtained from this stackoverflow post
+                // https://stackoverflow.com/questions/2115758/how-do-i-display-an-alert-dialog-on-android
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("There is no internet connection");
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(
+                        "Ok",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+
+        }
+
+
+        // Request the movies to the API
+        /*else {
             // Check if there is online connection, otherwise show message
             if (isOnline()) {
                 AppExecutor.getsInstance().networkIO().execute(new Runnable() {
@@ -294,27 +338,10 @@ public class MainActivity extends AppCompatActivity
                 });
             } else {
 
-                // If there is no internet connection show message
-                // Code obtained from this stackoverflow post
-                // https://stackoverflow.com/questions/2115758/how-do-i-display-an-alert-dialog-on-android
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("There is no internet connection");
-                builder.setCancelable(true);
-
-                builder.setPositiveButton(
-                        "Ok",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog alert = builder.create();
-                alert.show();
             }
 
-        }
+        }*/
     }
 
     /**
