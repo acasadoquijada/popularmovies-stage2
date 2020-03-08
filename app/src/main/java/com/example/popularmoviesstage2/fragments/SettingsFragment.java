@@ -8,7 +8,6 @@ import androidx.preference.CheckBoxPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import com.example.popularmoviesstage2.R;
@@ -32,6 +31,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
 
     }
+
 
     private void setPreferenceSummary(Preference preference, String value){
         if(preference instanceof ListPreference){

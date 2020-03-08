@@ -2,14 +2,11 @@ package com.example.popularmoviesstage2.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,59 +103,11 @@ public class DetailActivity extends AppCompatActivity {
                     // Toggle button for favorite movie
                     final ToggleButton toggle = findViewById(R.id.fav_togglebutton);
 
-
-                    if (savedInstanceState != null) {
-                        toggle_button_pressed = savedInstanceState.getBoolean(toogle_button_token);
-                    } else{
-                        // This means that the movie is in the DB, then we set the button as pressed
-
-                        AppExecutor.getsInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(movieDataBase.movieDAO().getMovie(movie.getId()) != null){
-                                    toggle_button_pressed = true;
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            toggle.setChecked(toggle_button_pressed);
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }
-
-                    toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                AppExecutor.getsInstance().diskIO().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        movieDataBase.movieDAO().insertMovie(movie);
-                                        toggle_button_pressed = true;
-                                    }
-                                });
-                            } else {
-                                AppExecutor.getsInstance().diskIO().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        movieDataBase.movieDAO().deleteMovie(movie);
-                                        if(pos != -1)
-                                            MainActivity.mAdapter.removeMovie(pos);
-
-                                        toggle_button_pressed = false;
-                                    }
-                                });
-                            }
-                        }
-                    });
-                    neoAddTrailers(movie);
-                    neoAddReviews(movie);
-                    // Movie trailers
-                    //AddMovieTrailers(movie);
-                    // Movie reviews
-                    //addMovieReviews(movie);
-
+                    // We check if the movie is in the fav database. If so, we update the toggle
+                    setUpToggleButton(toggle);
+                    // Add the trailers and reviews to the layout
+                    addTrailers(movie);
+                    addReviews(movie);
                 }
 
             }
@@ -166,7 +115,85 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public void neoAddReviews(Movie movie){
+    private void setUpToggleButton(final ToggleButton toggleButton){
+        updateToggleButton(toggleButton);
+        setOnCheckedChangeListener(toggleButton);
+    }
+
+    private void setOnCheckedChangeListener(final ToggleButton toggleButton){
+
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(movieDataBase.movieDAO().getMovie(movie.getId()) == null){
+                                movieDataBase.movieDAO().insertMovie(movie);
+                            }
+                        }
+                    });
+                } else {
+                    AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            movieDataBase.movieDAO().deleteMovie(movie);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    MainActivity.mAdapter.removeMovie(pos);
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }
+        });
+    }
+    private void updateToggleButton(final ToggleButton toggle) {
+        AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                if (movieDataBase.movieDAO().getMovie(movie.getId()) != null) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toggle.setChecked(true);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void noReviewOrTrailer(int layout_id){
+
+        LinearLayout contraConstraintLayout = findViewById(layout_id);
+
+        TextView textView = new TextView(this);
+
+        String no_reviews_text = "";
+        if(layout_id == R.id.review_linear_layout){
+            no_reviews_text = "There is no reviews for this movie"; // ADD TO STRINGS.xml
+
+        } else if(layout_id == R.id.trailer_linear_layout){
+            no_reviews_text = "There is no trailers for this movie"; // ADD TO STRINGS.xml
+        }
+        textView.setText(no_reviews_text);
+
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        textView.setLayoutParams(layoutParams);
+
+        contraConstraintLayout.addView(textView,contraConstraintLayout.getChildCount());
+    }
+    private void addReviews(Movie movie){
 
         // Get the parent layout
 
@@ -179,6 +206,10 @@ public class DetailActivity extends AppCompatActivity {
             // See parseContentReview and parseAuthor review for more details
 
             int review_number = movie.getReviews().size() / 2;
+
+            if(review_number == 0){
+                noReviewOrTrailer(R.id.review_linear_layout);
+            }
 
             for (int i = 0; i < review_number; i+=2) {
                 // Inflate review_layout
@@ -224,16 +255,18 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-
-
-    public void neoAddTrailers(Movie movie){
-
-        LinearLayout contraConstraintLayout = findViewById(R.id.trailer_linear_layout);
+    private void addTrailers(Movie movie){
 
         // This is because the trailers are stored as follow:
         // 0: Name, 1: Trailer, 2: Name, 3: Trailer...
         // See parseTrailerURL and parseTrailerName review for more details
         int trailer_number = movie.getTrailers().size()/2;
+
+        if(trailer_number == 0){
+            noReviewOrTrailer(R.id.trailer_linear_layout);
+        }
+
+        LinearLayout contraConstraintLayout = findViewById(R.id.trailer_linear_layout);
 
         for(int i = 0; i < trailer_number; i+=2) {
 
@@ -243,24 +276,15 @@ public class DetailActivity extends AppCompatActivity {
 
             View trailerLayout = inflater.inflate(R.layout.trailer_layout, null);
 
-            // Get the trailer imageView
-
-            ImageView trailerImageView = trailerLayout.findViewById(R.id.trailer_image_view);
-
             // Get the trailer textView
 
             TextView trailerTextView = trailerLayout.findViewById(R.id.trailer_text_view);
 
             // Set trailer textView text
-
-            String trailer_text = "Trailer" +  " " + i;
             trailerTextView.setText(movie.getTrailers().get(i));
 
-            // Set trailer video
-
-//            setOnClick(trailerImageView,movie.getTrailers().get(i+1));
-
             setOnClick(trailerLayout,movie.getTrailers().get(i+1));
+
             // Set trailer layout params
 
             ConstraintLayout.LayoutParams l = new ConstraintLayout.LayoutParams(
@@ -272,50 +296,6 @@ public class DetailActivity extends AppCompatActivity {
             contraConstraintLayout.addView(trailerLayout, contraConstraintLayout.getChildCount());
 
         }
-    }
-
-
-    /**
-     * Adds the views necessaries to display the trailers of a given movie
-     * @param movie to obtain the trailers fro
-     */
-    private void AddMovieTrailers(Movie movie){
-
-        // Get parent layout
-      /*  LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
-
-        // Create TextView to present trailer section
-        TextView trailer_section_title = getTitleSection("Trailers");
-        bottomLinearLayout.addView(trailer_section_title,bottomLinearLayout.getChildCount());
-
-        // Create LinearLayout for the Trailers
-
-        LinearLayout trailerLinearLayout = createLinearLayout();
-
-        // Iterate over the trailers
-
-        int padding_in_dp = 15;
-        int padding_in_px = calculatePX(padding_in_dp);
-
-        for(int i = 0; i < movie.getTrailers().size(); i++){
-            ImageView trailerImageView = new ImageView(this);
-            TextView trailerTextView = new TextView(this);
-
-            trailerTextView.append("Trailer" + " " + (i+1));
-
-            trailerTextView.setPadding(0,padding_in_px,0,padding_in_px);
-
-            trailerImageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_media_video_poster));
-
-            trailerImageView.setPadding(0,padding_in_px,0,padding_in_px);
-
-            setOnClick(trailerImageView,movie.getTrailers().get(i));
-
-            trailerLinearLayout.addView(trailerTextView,trailerLinearLayout.getChildCount());
-            trailerLinearLayout.addView(trailerImageView,trailerLinearLayout.getChildCount());
-        }
-
-        bottomLinearLayout.addView(trailerLinearLayout,bottomLinearLayout.getChildCount());*/
     }
 
     /**
@@ -334,59 +314,6 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
     }
-
-    /**
-     * Creates a LinearLayout. This is used for the Reviews and Trailers.
-     * @return a LinearLayout
-     */
-
-    private LinearLayout createLinearLayout(){
-
-        LinearLayout linearLayout = new LinearLayout(this);
-
-        linearLayout.setLayoutParams(
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        int padding_in_dp = 20;
-        final float scale = getResources().getDisplayMetrics().density;
-        int padding_in_px = (int) (padding_in_dp * scale + 0.5f);
-
-        linearLayout.setPadding(padding_in_px,padding_in_px,padding_in_px,padding_in_px);
-
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-        linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-
-        linearLayout.setDividerDrawable(getResources().getDrawable(R.drawable.shape));
-
-        return linearLayout;
-    }
-
-    /**
-     * Creates a TextView that works as a title for a new section.
-     * This is used for Reviews and trailers
-     * @param section_name to be set in the TextView
-     * @return a TextView object
-     */
-    private TextView getTitleSection(String section_name){
-
-        TextView section_title = new TextView(this);
-
-        section_title.setText(section_name);
-
-        int padding_in_dp = 20;
-        int padding_in_px = calculatePX(padding_in_dp);
-
-        section_title.setPadding(padding_in_px,0,0,0);
-
-        section_title.setTextColor(getResources().getColor(android.R.color.black));
-
-        section_title.setTextSize(25);
-
-        return section_title;
-    }
-
     /**
      * Convert the dp unit to px.
      *
@@ -407,47 +334,6 @@ public class DetailActivity extends AppCompatActivity {
      * Adds the views necessaries to display the reviews of a given movie
      * movie to obtain the reviews from
      */
-    /*private void addMovieReviews(Movie movie){
-
-        // Get trailerLinearLayout layout
-        LinearLayout bottomLinearLayout = findViewById(R.id.bottom_linear_layout);
-
-        TextView review_section_title = getTitleSection("Reviews");
-        bottomLinearLayout.addView(review_section_title,bottomLinearLayout.getChildCount());
-
-        // Create LinearLayout for the Reviews
-
-        LinearLayout reviewLinearLayout = createLinearLayout();
-
-        // Iterate over the reviews and add them as textviews
-
-        int padding_in_dp = 15;
-        int padding_in_px = calculatePX(padding_in_dp);
-
-        // In case there is not reviews we let the user know
-        if(movie.getReviews().size() == 0){
-            TextView reviewTextView = new TextView(this);
-
-            String no_reviews = "There is no reviews for this movie";
-            reviewTextView.setText(no_reviews);
-
-            reviewTextView.setPadding(0,padding_in_px,0,padding_in_px);
-
-            reviewLinearLayout.addView(reviewTextView,reviewLinearLayout.getChildCount());
-        } else {
-            for(int i = 0; i < movie.getReviews().size(); i++){
-                TextView reviewTextView = new TextView(this);
-
-                reviewTextView.setText(movie.getReviews().get(i));
-
-                reviewTextView.setPadding(0,padding_in_px,0,padding_in_px);
-
-                reviewLinearLayout.addView(reviewTextView,reviewLinearLayout.getChildCount());
-            }
-        }
-
-        bottomLinearLayout.addView(reviewLinearLayout,bottomLinearLayout.getChildCount());
-    }*/
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {

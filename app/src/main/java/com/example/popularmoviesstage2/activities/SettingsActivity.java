@@ -1,3 +1,4 @@
+
 package com.example.popularmoviesstage2.activities;
 
 import android.os.Bundle;

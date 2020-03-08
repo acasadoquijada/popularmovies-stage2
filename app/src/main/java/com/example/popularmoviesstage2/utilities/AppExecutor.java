@@ -2,9 +2,7 @@ package com.example.popularmoviesstage2.utilities;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.os.NetworkOnMainThreadException;
 
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 
 import java.util.concurrent.Executor;
@@ -50,7 +48,7 @@ public class AppExecutor {
     }
 
     private static class MainThreadExecutor implements Executor {
-        private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+        private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
         @Override
         public void execute(@NonNull Runnable command) {

@@ -9,7 +9,6 @@ import androidx.room.TypeConverters;
 
 import com.example.popularmoviesstage2.database.MovieConverter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

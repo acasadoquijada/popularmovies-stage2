@@ -1,7 +1,6 @@
 package com.example.popularmoviesstage2.movie;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,16 +29,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     /**
      * Constructor method
-     * @param numberOfItems number of movies
      * @param listener onClickListener
-     * @param m ArrayList of movies
      */
-
-    public MovieAdapter(int numberOfItems, GridItemClickListener listener,List<Movie> m){
-        mNumberOfItems = m.size();
-        gridItemClickListener = listener;
-        mMovies = m;
-    }
 
     public MovieAdapter(GridItemClickListener listener){
         this.mMovies = new ArrayList<>();
