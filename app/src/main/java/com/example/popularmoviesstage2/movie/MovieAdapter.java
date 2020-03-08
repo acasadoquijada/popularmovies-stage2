@@ -36,9 +36,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
      */
 
     public MovieAdapter(int numberOfItems, GridItemClickListener listener,List<Movie> m){
-        mNumberOfItems = numberOfItems;
+        mNumberOfItems = m.size();
         gridItemClickListener = listener;
         mMovies = m;
+    }
+
+    public MovieAdapter(GridItemClickListener listener){
+        this.mMovies = new ArrayList<>();
+        this.gridItemClickListener = listener;
     }
 
     public void updateData(List<Movie> movies){

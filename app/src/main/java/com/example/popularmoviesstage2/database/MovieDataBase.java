@@ -24,7 +24,7 @@ public abstract class MovieDataBase extends RoomDatabase {
                         context.getApplicationContext(),
                         MovieDataBase.class,
                         MovieDataBase.DATABASE_NAME)
-                        .allowMainThreadQueries() // TESTING PURPOSES!! DELETE
+                      //  .allowMainThreadQueries() // TESTING PURPOSES!! DELETE
                         .build();
             }
         }

@@ -22,6 +22,7 @@ import android.widget.ToggleButton;
 import com.example.popularmoviesstage2.database.MovieDataBase;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.R;
+import com.example.popularmoviesstage2.utilities.AppExecutor;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -103,40 +104,54 @@ public class DetailActivity extends AppCompatActivity {
                     textViewVoteAverage.append(movie.getVote_average() + "/10");
 
                     // Toggle button for favorite movie
-                    ToggleButton toggle = findViewById(R.id.fav_togglebutton);
+                    final ToggleButton toggle = findViewById(R.id.fav_togglebutton);
 
 
                     if (savedInstanceState != null) {
                         toggle_button_pressed = savedInstanceState.getBoolean(toogle_button_token);
                     } else{
                         // This means that the movie is in the DB, then we set the button as pressed
-                        if(movieDataBase.movieDAO().getMovie(movie.getId()) != null){
-                            toggle_button_pressed = true;
-                        }
-                    }
 
-                    toggle.setChecked(toggle_button_pressed);
+                        AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(movieDataBase.movieDAO().getMovie(movie.getId()) != null){
+                                    toggle_button_pressed = true;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            toggle.setChecked(toggle_button_pressed);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
 
                     toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                             if (isChecked) {
-                                movieDataBase.movieDAO().insertMovie(movie);
-                                //MainActivity.db.insertMovie(movie);
-                                toggle_button_pressed = true;
-
-
+                                AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        movieDataBase.movieDAO().insertMovie(movie);
+                                        toggle_button_pressed = true;
+                                    }
+                                });
                             } else {
-                                movieDataBase.movieDAO().deleteMovie(movie);
-                                //MainActivity.db.deleteMovie(movie);
+                                AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        movieDataBase.movieDAO().deleteMovie(movie);
+                                        if(pos != -1)
+                                            MainActivity.mAdapter.removeMovie(pos);
 
-                                if(pos != -1)
-                                    MainActivity.mAdapter.removeMovie(pos);
-
-                                toggle_button_pressed = false;
+                                        toggle_button_pressed = false;
+                                    }
+                                });
                             }
                         }
                     });
-
                     neoAddTrailers(movie);
                     neoAddReviews(movie);
                     // Movie trailers

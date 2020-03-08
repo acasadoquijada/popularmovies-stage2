@@ -23,6 +23,7 @@ import com.example.popularmoviesstage2.database.MovieDataBase;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.movie.MovieAdapter;
 import com.example.popularmoviesstage2.R;
+import com.example.popularmoviesstage2.utilities.AppExecutor;
 import com.example.popularmoviesstage2.utilities.JsonMovieUtils;
 import com.example.popularmoviesstage2.utilities.NetworkUtils;
 
@@ -37,17 +38,13 @@ import java.util.List;
  * Main Activity of the Popular Movies Stage 2 application
  */
 public class MainActivity extends AppCompatActivity
-        implements MovieAdapter.GridItemClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+        implements MovieAdapter.GridItemClickListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static MovieAdapter mAdapter;
     private RecyclerView mMovieGrid;
     private List<Movie> mMovies;
     private List<Movie> mFavoriteMovies;
-
-    private String previousSortOption = "";
-    private String currentSortOption = "";
-    private String appName = "";
-    private boolean favoriteMoviesShowing;
 
     public static final String bundle_token = "token";
     public static final String parcelable_token = "parcelable";
@@ -55,11 +52,7 @@ public class MainActivity extends AppCompatActivity
 
     private String sort_option = "";
     private final String movies_token = "movies";
-    private final String favorite_movies_token = "favorite_movies";
-    private final String favorite_movies_showing_token = "favorite_movies_showing";
-    private final String previous_sort_option_token = "previousSortOption";
-    private final String current_sort_option_token = "currentSortOption";
-    private final String title_token = "title";
+    private final String sort_option_token = "sort_option";
 
     private MovieDataBase movieDataBase;
 
@@ -74,24 +67,10 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
-            mMovies = savedInstanceState.getParcelableArrayList(movies_token);
-            previousSortOption = savedInstanceState.getString(previous_sort_option_token);
-            currentSortOption = savedInstanceState.getString(current_sort_option_token);
-            favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
-
-        } else{
-            previousSortOption = "";
-            mMovies = new ArrayList<>();
-
-            favoriteMoviesShowing = false;
+            sort_option = savedInstanceState.getString(sort_option_token);
         }
 
-        setupSharedPreferences();
-        // Create database
-
-        mFavoriteMovies = new ArrayList<>();
-        movieDataBase = MovieDataBase.getInstance(getApplicationContext());
-        retrieveFavoriteMovies();
+        // Setup adapter
 
         mMovieGrid = findViewById(R.id.MovieRecyclerView);
 
@@ -99,44 +78,47 @@ public class MainActivity extends AppCompatActivity
 
         mMovieGrid.setLayoutManager(gridLayoutManager);
 
-        // Get the movies according to the sort option selected
+        mAdapter = new MovieAdapter(this);
 
-        if(sort_option.equals(getString(R.string.sort_fav_value))){
-            mFavoriteMovies = movieDataBase.movieDAO().getMovies().getValue();
-            if(mFavoriteMovies != null)
-                mAdapter = new MovieAdapter(mFavoriteMovies.size(),this, mFavoriteMovies);
+        // Setup preferences
+        setupSharedPreferences();
 
-        } else {
-            mAdapter = new MovieAdapter(mMovies.size(),this, mMovies);
-            new FetchMoviesTask().execute(sort_option);
-        }
+        // Setup movies lists. This will change with the use of ViewModel
+
+        mMovies = new ArrayList<>();
+     //   mFavoriteMovies = new ArrayList<>();
+
+        // Setup database
+
+        movieDataBase = MovieDataBase.getInstance(getApplicationContext());
+
+        // Retrieve fav_movies and set LiveData observer
+
+        retrieveFavoriteMovies();
+
+        queryMovies(sort_option);
 
         mMovieGrid.setAdapter(mAdapter);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-     //   outState.putParcelableArrayList(movies_token, mMovies);
-       // outState.putParcelableArrayList(favorite_movies_token, mFavoriteMovies);
 
-        outState.putString(previous_sort_option_token, previousSortOption);
-        outState.putString(current_sort_option_token, currentSortOption);
-        outState.putBoolean(favorite_movies_showing_token,favoriteMoviesShowing);
-        outState.putString(title_token, appName);
+        // The movies (api_movies and fav_movies) will be handled by a ModelView
+        // This way we don't need to store and recover them
+//        outState.putParcelableArrayList(movies_token, Movies);
+
+        outState.putString(sort_option_token,sort_option);
 
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        mMovies = savedInstanceState.getParcelableArrayList(movies_token);
+        sort_option = savedInstanceState.getString(sort_option_token);
 
-        appName = savedInstanceState.getString(title_token);
-        previousSortOption = savedInstanceState.getString(previous_sort_option_token);
-        currentSortOption = savedInstanceState.getString(current_sort_option_token);
-
-        favoriteMoviesShowing = savedInstanceState.getBoolean(favorite_movies_showing_token);
-   }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
 
     /**
      * Inflates the menu that handles the movie sorting
@@ -175,7 +157,6 @@ public class MainActivity extends AppCompatActivity
         sort_option = sharedPreferences.getString(getString(R.string.sort_key),getString(R.string.sort_popular_label));
     }
 
-
     /**
      * Method in charge of creating a DetailActivity to presents the details of the movie
      * clicked by the user
@@ -187,7 +168,7 @@ public class MainActivity extends AppCompatActivity
 
         Bundle bundle = new Bundle();
 
-        if(favoriteMoviesShowing){
+        if(sort_option.equals(getString(R.string.sort_fav_value))){
             bundle.putParcelable(parcelable_token, mFavoriteMovies.get(clickedItemIndex));
         } else{
             bundle.putParcelable(parcelable_token, mMovies.get(clickedItemIndex));
@@ -203,10 +184,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private boolean needToRequestMovies(String current, String previous){
-        return false;
-    }
-
     // Fav -> rotate -> popular
 
     @Override
@@ -216,6 +193,8 @@ public class MainActivity extends AppCompatActivity
 
             sort_option = sharedPreferences.getString(getString(R.string.sort_key), getString(R.string.sort_popular_label));
 
+            queryMovies(sort_option);
+/*
             if (sort_option.equals(getString(R.string.sort_popular_value))) {
                 new FetchMoviesTask().execute(NetworkUtils.popular);
             }
@@ -226,8 +205,9 @@ public class MainActivity extends AppCompatActivity
 
             if (sort_option.equals(getString(R.string.sort_fav_value))) {
                 mAdapter.updateData(mFavoriteMovies);
+                //mAdapter.notifyDataSetChanged();
                 //retrieveFavoriteMovies();
-            }
+            }*/
         }
     }
 
@@ -244,12 +224,86 @@ public class MainActivity extends AppCompatActivity
         movies.observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(List<Movie> movies) {
-                if(mFavoriteMovies != null){
                     mFavoriteMovies = movies;
-                }
-
             }
         });
+
+    }
+
+    private void QueryFavMovies() {
+
+    }
+
+    private void queryMovies(final String query){
+
+        sort_option = query;
+        final ProgressDialog progDailog = new ProgressDialog(MainActivity.this);
+        progDailog.setMessage("Loading " + sort_option + " movies");
+        progDailog.setIndeterminate(false);
+        progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progDailog.setCancelable(true);
+        progDailog.show();
+
+        if(sort_option.equals(getString(R.string.sort_fav_value))){
+            AppExecutor.getsInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("DONE__", "diskIO calls to updateData");
+                    mFavoriteMovies = movieDataBase.movieDAO().getMoviesNoLiveData();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.updateData(mFavoriteMovies);
+                            progDailog.dismiss();
+                            Log.d("DONE__", "I UPDATED FAV MOVIES!!");
+                        }
+                    });
+                }
+            });
+        }
+
+        else {
+            AppExecutor.getsInstance().networkIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        Log.d("DONE__", "START QUERY " + query);
+
+                        String jsonMovies;
+
+                        switch (query) {
+                            case NetworkUtils.top_rated:
+                                jsonMovies = NetworkUtils.getTopRateMovies();
+                                break;
+                            case NetworkUtils.popular:
+                                jsonMovies = NetworkUtils.getPopularMovies();
+                                break;
+                            default:
+                                jsonMovies = "";
+                                break;
+                        }
+
+                        Log.d("DONE__", "IM GOING TO UPDATE!!");
+
+                        mMovies = JsonMovieUtils.parseMoviesJsonArray(jsonMovies);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.updateData(mMovies);
+                                progDailog.dismiss();
+                                Log.d("DONE__", "I UPDATED!!");
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        Log.d("DONE__", "I FAILED!!");
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
 
     }
     /**
@@ -316,7 +370,7 @@ public class MainActivity extends AppCompatActivity
 
                     try {
 
-                        currentSortOption = strings[0];
+                        sort_option = strings[0];
 
                         String jsonMovies;
 
