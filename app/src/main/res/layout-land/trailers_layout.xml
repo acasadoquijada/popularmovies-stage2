@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="@layout/activity_detail">
+
+
+    <TextView
+        android:id="@+id/trailer_section_textview_label"
+        style="@style/trailers_layout_label_style"
+        android:layout_marginTop="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/release_date"
+        tools:text="Trailers" />
+
+    <LinearLayout
+        android:id="@+id/trailer_linear_layout"
+        style="@style/trailers_layout_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/trailer_section_textview_label" />
+</merge>

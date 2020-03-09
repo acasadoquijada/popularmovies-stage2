@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="@layout/activity_detail">
+
+
+    <TextView
+        android:id="@+id/review_section__textview_label"
+        style="@style/reviews_layout_label_style"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/trailer_linear_layout"
+        tools:text="Reviews" />
+
+    <LinearLayout
+        android:id="@+id/review_linear_layout"
+        style="@style/reviews_layout_style"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/review_section__textview_label" />
+</merge>

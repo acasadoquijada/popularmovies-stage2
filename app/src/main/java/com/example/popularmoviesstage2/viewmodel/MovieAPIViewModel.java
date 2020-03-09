@@ -20,7 +20,6 @@ public class MovieAPIViewModel extends AndroidViewModel {
 
     private List<Movie> mMovies;
     private String mSortOption;
-    private ProgressDialog progDialog;
 
     public MovieAPIViewModel(@NonNull Application application) {
         super(application);
@@ -42,6 +41,7 @@ public class MovieAPIViewModel extends AndroidViewModel {
                     Log.d("SUPER__", "IM GETTING THE DATA FROM THE MODEL VIEW!!");
                     MainActivity.setMovies(mMovies);
                     MainActivity.mAdapter.updateData(mMovies);
+                    MainActivity.progDailog.dismiss();
                 }
             });
 
@@ -76,6 +76,7 @@ public class MovieAPIViewModel extends AndroidViewModel {
                             Log.d("SUPER__", "IM ASKING API FROM MODELVIEW!!");
                             MainActivity.setMovies(mMovies);
                             MainActivity.mAdapter.updateData(mMovies);
+                            MainActivity.progDailog.dismiss();
                         }
                     });
 

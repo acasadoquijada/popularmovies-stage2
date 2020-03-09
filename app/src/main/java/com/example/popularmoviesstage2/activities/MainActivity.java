@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity
     public static final String parcelable_token = "parcelable";
     public static final String movie_pos_token = "movie_pos";
 
+    public static ProgressDialog progDailog;
 
     private final String sort_option_token = "mSortOption";
 
@@ -255,7 +256,7 @@ public class MainActivity extends AppCompatActivity
 
         mSortOption = query;
 
-        final ProgressDialog progDailog = new ProgressDialog(MainActivity.this);
+        progDailog = new ProgressDialog(MainActivity.this);
         progDailog.setMessage("Loading " + mSortOption + " movies");
         progDailog.setIndeterminate(false);
         progDailog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -273,8 +274,8 @@ public class MainActivity extends AppCompatActivity
         else {
             if(isOnline()){
                 viewModel.requestMovie(mSortOption);
-                progDailog.dismiss();
             } else {
+
                 // If there is no internet connection show message
                 // Code obtained from this stackoverflow post
                 // https://stackoverflow.com/questions/2115758/how-do-i-display-an-alert-dialog-on-android

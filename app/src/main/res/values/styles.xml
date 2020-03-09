@@ -10,4 +10,83 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
+    <style name="section_layout_style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="trailers_layout_style" parent="section_layout_style">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:divider">@drawable/shape</item>
+        <item name="android:dividerPadding">0dp</item>
+        <item name="android:showDividers">beginning|end|middle</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="reviews_layout_style" parent="section_layout_style">
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="section_label_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:textSize">23sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="trailers_layout_label_style" parent="section_label_style">
+        <item name="android:text">@string/trailer_label</item>
+    </style>
+
+    <style name="reviews_layout_label_style" parent="trailers_layout_label_style">
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:text">@string/review_label</item>
+    </style>
+
+    <style name="movie_title_style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">start</item>
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:padding">10sp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="movie_image_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <style name="release_date_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <style name="vote_average_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+    </style>
+
+    <style name="fav_toggle_button_style">
+        <item name="android:background">@drawable/toogle_selector</item>
+        <item name="android:checked">false</item>
+        <item name="android:textOff">""</item>
+        <item name="android:textOn">""</item>
+    </style>
+
 </resources>
