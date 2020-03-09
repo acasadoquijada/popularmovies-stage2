@@ -8,6 +8,10 @@ import androidx.annotation.NonNull;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ *  Utils class to run event in different threads
+ */
+
 public class AppExecutor {
 
     private static final Object LOCK = new Object();

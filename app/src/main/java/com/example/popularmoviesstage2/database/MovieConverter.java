@@ -5,6 +5,10 @@ import androidx.room.TypeConverter;
 import com.example.popularmoviesstage2.movie.Movie;
 import com.google.gson.Gson;
 
+/**
+ * Converts a Movie object to String and viceversa
+ */
+
 public class MovieConverter {
 
     @TypeConverter

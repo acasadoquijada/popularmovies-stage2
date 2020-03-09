@@ -1,8 +1,6 @@
 package com.example.popularmoviesstage2.viewmodel;
 
 import android.app.Application;
-import android.app.ProgressDialog;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -15,6 +13,11 @@ import com.example.popularmoviesstage2.utilities.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * This class ensures that the movies requested via API survive to configuration changes
+ * like app rotations. We avoid unnecessaries queries to the movies APUI
+ */
 
 public class MovieAPIViewModel extends AndroidViewModel {
 
@@ -31,14 +34,18 @@ public class MovieAPIViewModel extends AndroidViewModel {
         return mMovies;
     }
 
+    /**
+     * This method request the movies to the online API
+     *
+     * @param mSortOption query selected by the user
+     */
     public void requestMovie(final String mSortOption) {
 
+        // If we request the movies we already have, just return them
         if(this.mSortOption.equals(mSortOption)){
-
             AppExecutor.getsInstance().mainThread().execute(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("SUPER__", "IM GETTING THE DATA FROM THE MODEL VIEW!!");
                     MainActivity.setMovies(mMovies);
                     MainActivity.mAdapter.updateData(mMovies);
                     MainActivity.progDailog.dismiss();
@@ -70,15 +77,17 @@ public class MovieAPIViewModel extends AndroidViewModel {
 
                     mMovies = JsonMovieUtils.parseMoviesJsonArray(jsonMovies);
 
-                    AppExecutor.getsInstance().mainThread().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d("SUPER__", "IM ASKING API FROM MODELVIEW!!");
-                            MainActivity.setMovies(mMovies);
-                            MainActivity.mAdapter.updateData(mMovies);
-                            MainActivity.progDailog.dismiss();
-                        }
-                    });
+                    if(mMovies != null){
+                        AppExecutor.getsInstance().mainThread().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity.setMovies(mMovies);
+                                MainActivity.mAdapter.updateData(mMovies);
+                                MainActivity.progDailog.dismiss();
+                            }
+                        });
+
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -18,10 +18,6 @@ public interface MovieDAO  {
     @Query("SELECT * FROM movies")
     LiveData<List<Movie>> getMovies();
 
-    // Query needed for init fav_movies
-    @Query("SELECT * FROM movies")
-    List<Movie> getMoviesNoLiveData();
-
     @Query("SELECT * FROM movies WHERE + movies.id = :movie_id ")
     Movie getMovie(int movie_id);
 

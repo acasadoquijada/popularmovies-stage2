@@ -56,14 +56,22 @@ public class SettingsFragment extends PreferenceFragmentCompat
             }
         }
 
-
     }
+
+    /**
+     * Registers onSharedPreferenceChangeListener
+     * @param savedInstanceState bundle
+     */
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
+
+    /**
+     * Unregister onSharedPreferenceChangeListener
+     */
 
     @Override
     public void onDestroy() {

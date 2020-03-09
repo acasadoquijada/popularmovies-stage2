@@ -6,7 +6,10 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -28,6 +31,8 @@ public class NetworkUtils {
     private static final String api_key_sort = "api_key";
     private static final String videos_token = "videos";
     private static final String reviews_token = "reviews";
+
+    private static boolean mIsOnline;
 
     /**
      * Creates a URL with the specified sort option
@@ -144,5 +149,40 @@ public class NetworkUtils {
         } finally {
             urlConnection.disconnect();
         }
+    }
+
+    /**
+     * Checks if there is internet connection.
+     * This method has been obtaion from this StackOverflow post:
+     * https://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-times-out
+     *
+     * This method is used instead of other alternatives because it works in most of Android version
+     * and is a lightweight operation
+     * @return true if there is internet connection, false otherwise
+     */
+
+    public static boolean isOnline() {
+
+        mIsOnline = true;
+        AppExecutor.getsInstance().networkIO().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    int timeoutMs = 1500;
+                    Socket sock = new Socket();
+                    SocketAddress sockaddr = new InetSocketAddress("8.8.8.8", 53);
+
+                    sock.connect(sockaddr, timeoutMs);
+                    sock.close();
+
+                    mIsOnline = true;
+                } catch (IOException e) {
+                    mIsOnline = false;
+                }
+            }
+        });
+
+        return mIsOnline;
     }
 }

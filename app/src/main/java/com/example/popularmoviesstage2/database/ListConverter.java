@@ -8,10 +8,19 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 
+
+
 // Code obtain from this stackoverflow post:
 // https://stackoverflow.com/questions/44986626/
 // android-room-database-how-to-handle-arraylist-in-an-entity/51083865
 
+/**
+ * Class needed for Room. It converts a List<String> to String and viceversa
+ *
+ * Code obtain from this stackoverflow post:
+ * https://stackoverflow.com/questions/44986626/
+ * android-room-database-how-to-handle-arraylist-in-an-entity/51083865
+ */
 class ListConverter {
 
     @TypeConverter
