@@ -14,24 +14,39 @@ This application is built on top of [Popular Movies Stage 1](https://github.com/
  * Added sort option to sort by favorites
  * The favorites movies are stored in a SQLite DataBase
 	
-## Application class structure (TO DO: UPDATE)
+## Application class structure
 
     |-- activities package
     |   |-- DetailActivity.java
     |   |-- MainActivity.java
+    |   |-- SettingActivity.java
+    |-- database package
+    |   |-- ListConverter.java
+    |   |-- MovieConverter.java
+    |   |-- MovieDAO.java
+    |   |-- MovieDataBase.java
+    |-- fragments package
+    |   |-- SettingFragments.java
     |-- movie package
     |   |-- Movie.java
     |   |-- MovieAdapter.java
     |-- utilities package
+    |   |-- AppExecutor.java 
     |   |-- JsonMovieUtils.java
     |   |-- NetworkUtils.java
-    |-- database package
-    |   |-- DataBaseHelper.java
+    |-- viewmodel package
+    |   |-- MainViewModel.java 
+    |   |-- MovieAPIViewModel.java
 
 **Activities package**
 
 * DetailActivity: Activity where the details of a movie are shown
 * MainActivity: Main Activity of the app. All the network request are done here
+* SettingActivity: Activiy in charge of handling the settings. In this case, the sort option
+
+**Database package**
+
+Contains all the necesary classes to use Room to store the favorite movies of the user in a SQL database
 
 **Movie package**
 
@@ -42,10 +57,13 @@ This application is built on top of [Popular Movies Stage 1](https://github.com/
 
 * JsonMovieUtils: Parses the movie info obtained from JSON as results of network requets
 * NetWorkUtils: Request movie info to themoviedb.org
+* AppExecutor: Provides infrastructure to perform tasks in different thread
 
-**Database package**
+**ViewModel package**
 
-* DataBaseHelper: Store in a SQLite database the movies marked as favorite by the user
+* MainViewModel: Contains LiveData. This LiveData is the favorite movies of the user. 
+
+* MovieAPIViewModel: Requets the movies to themoviedb.org. 
 
    
 ## Add your themoviedb.org API key
@@ -56,5 +74,7 @@ The key goes in the NetworkUtils.java class of the utilties package line 26. [sh
 
 ## Logos
 
-The res > drawable > ic_video_camera.xml icon has been designed by Those Icons from flaticom.com. More information here:
+The res > drawable > **ic_video_camera.xml** icon has been **designed by Those Icons** from ** flaticom.com ** 
+
+More information here:
 Icons made by <a href="https://www.flaticon.com/authors/those-icons" title="Those Icons">Those Icons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>

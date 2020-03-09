@@ -56,6 +56,13 @@ public class NetworkUtils {
 
     }
 
+    /**
+     * Helper method to get URL for the reviews and trailers
+     * @param id that identifies the movie
+     * @param extra_info this can be "reviews" or "trailers"
+     * @return URL of the reviews and/or trailers
+     */
+
     private static URL buildMovieExtraInfoUrl(int id, String extra_info){
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(String.valueOf(id))
