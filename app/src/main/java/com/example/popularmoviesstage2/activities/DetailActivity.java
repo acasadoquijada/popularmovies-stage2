@@ -1,7 +1,9 @@
 package com.example.popularmoviesstage2.activities;
 
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -11,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -21,6 +22,8 @@ import com.example.popularmoviesstage2.movie.Movie;
 import com.example.popularmoviesstage2.R;
 import com.example.popularmoviesstage2.utilities.AppExecutor;
 import com.squareup.picasso.Picasso;
+
+import com.example.popularmoviesstage2.databinding.ActivityDetailBinding;
 
 /**
  * Activity class that presents the movie details to the user
@@ -53,11 +56,8 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        TextView textViewTitle;
-        TextView textViewOverview;
-        TextView textViewReleaseDate;
-        TextView textViewVoteAverage;
-        ImageView imageViewMoviePoster;
+        ActivityDetailBinding mBinding =
+                DataBindingUtil.setContentView(this, R.layout.activity_detail);
 
         movieDataBase = MovieDataBase.getInstance(getApplicationContext());
 
@@ -77,34 +77,27 @@ public class DetailActivity extends AppCompatActivity {
 
                 if (movie != null) {
                     // Movie poster
-                    imageViewMoviePoster = findViewById(R.id.movie_poster);
-                    Picasso.get().load(movie.getPoster_path()).into(imageViewMoviePoster);
+                    Picasso.get().load(movie.getPoster_path()).into(mBinding.moviePoster);
 
                     // Movie original_title
-                    textViewTitle = findViewById(R.id.title);
-                    textViewTitle.setText(movie.getOriginal_title());
+                    mBinding.title.setText(movie.getOriginal_title());
 
                     // Movie overview
-                    textViewOverview = findViewById(R.id.overview);
-                    textViewOverview.setText(movie.getOverview());
+                    mBinding.overview.setText(movie.getOverview());
 
                     // Movie release date
                     String release_date_help_text = "Release date: ";
-                    textViewReleaseDate = findViewById(R.id.release_date);
-                    textViewReleaseDate.setText(release_date_help_text);
-                    textViewReleaseDate.append(movie.getRelease_date());
+
+                    mBinding.releaseDate.setText(release_date_help_text);
+                    mBinding.releaseDate.append(movie.getRelease_date());
 
                     // Movie vote average
                     String vote_average_help_text = "Vote average: ";
-                    textViewVoteAverage = findViewById(R.id.vote_average);
-                    textViewVoteAverage.setText(vote_average_help_text);
-                    textViewVoteAverage.append(movie.getVote_average() + "/10");
-
-                    // Toggle button for favorite movie
-                    final ToggleButton toggle = findViewById(R.id.fav_togglebutton);
+                    mBinding.voteAverage.setText(vote_average_help_text);
+                    mBinding.voteAverage.append(movie.getVote_average() + "/10");
 
                     // We check if the movie is in the fav database. If so, we update the toggle
-                    setUpToggleButton(toggle);
+                    setUpToggleButton(mBinding.favTogglebutton);
                     // Add the trailers and reviews to the layout
                     addTrailers(movie);
                     addReviews(movie);
@@ -114,6 +107,11 @@ public class DetailActivity extends AppCompatActivity {
 
         }
     }
+
+    /**
+     * Setups the corresponding checked state and its listener
+     * @param toggleButton to modify
+     */
 
     private void setUpToggleButton(final ToggleButton toggleButton){
         updateToggleButton(toggleButton);
@@ -168,20 +166,24 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * In case a movie doesn't have trailers and/or reviews we display an informative text
+     * @param layout_id that identifies if the movie doesn't have trailers or reviews
+     */
+
     private void noReviewOrTrailer(int layout_id){
 
         LinearLayout contraConstraintLayout = findViewById(layout_id);
 
         TextView textView = new TextView(this);
 
-        String no_reviews_text = "";
+        String no_reviews_trailers_text = "";
         if(layout_id == R.id.review_linear_layout){
-            no_reviews_text = "There is no reviews for this movie"; // ADD TO STRINGS.xml
-
+            no_reviews_trailers_text = getString(R.string.no_reviews);
         } else if(layout_id == R.id.trailer_linear_layout){
-            no_reviews_text = "There is no trailers for this movie"; // ADD TO STRINGS.xml
+            no_reviews_trailers_text = getString(R.string.no_trailer);
         }
-        textView.setText(no_reviews_text);
+        textView.setText(no_reviews_trailers_text);
 
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -192,13 +194,19 @@ public class DetailActivity extends AppCompatActivity {
 
         contraConstraintLayout.addView(textView,contraConstraintLayout.getChildCount());
     }
+
+    /**
+     * Adds the reviews (review_layout) to the corresponding layout
+     * @param movie to obtain the reviews from
+     */
+
     private void addReviews(Movie movie){
 
         // Get the parent layout
 
-        LinearLayout contraConstraintLayout = findViewById(R.id.review_linear_layout);
+        LinearLayout reviewsLayout = findViewById(R.id.review_linear_layout);
 
-        if(contraConstraintLayout != null) {
+        if(reviewsLayout != null) {
 
             // This is because the reviews are stored as follow:
             // 0: Author, 1: Review, 2: Author, 3: Review...
@@ -249,10 +257,15 @@ public class DetailActivity extends AppCompatActivity {
 
                 reviewLayout.setLayoutParams(l);
 
-                contraConstraintLayout.addView(reviewLayout, contraConstraintLayout.getChildCount());
+                reviewsLayout.addView(reviewLayout, reviewsLayout.getChildCount());
             }
         }
     }
+
+    /**
+     * Adds the trailers (trailer_layout) to the corresponding layout
+     * @param movie to obtain the trailers from
+     */
 
     private void addTrailers(Movie movie){
 
@@ -313,26 +326,6 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
     }
-    /**
-     * Convert the dp unit to px.
-     *
-     * Conversion formula obtained here:
-     * https://stackoverflow.com/questions/4275797/
-     * view-setpadding-accepts-only-in-px-is-there-anyway-to-setpadding-in-dp
-     * @param dp to be converted into px
-     * @return px
-     */
-
-    private int calculatePX(int dp){
-
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
-    }
-
-    /**
-     * Adds the views necessaries to display the reviews of a given movie
-     * movie to obtain the reviews from
-     */
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -342,7 +335,6 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(toogle_button_token, toggle_button_pressed);
-        // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState);
     }
 

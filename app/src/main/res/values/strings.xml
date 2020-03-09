@@ -28,4 +28,6 @@
         This is a image representing a camera. Click to open the trailer
     </string>
 
+    <string name="no_trailer">There is no trailers for this movie</string>
+    <string name="no_reviews">There is no reviews for this movie</string>
 </resources>
