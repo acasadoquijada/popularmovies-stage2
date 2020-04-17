@@ -65,6 +65,12 @@ Contains all the necesary classes to use Room to store the favorite movies of th
 
 * MovieAPIViewModel: Requets the movies to themoviedb.org. 
 
+
+## Screenshots
+
+See [here](https://github.com/acasadoquijada/popularmovies-stage2/tree/master/doc/images)
+
+![mainActivityPortrait](doc/images/main_portrait.jpg) ![recipeDetailPortrait](doc/images/details_portrait.jpg) 
    
 ## Add your themoviedb.org API key
 
